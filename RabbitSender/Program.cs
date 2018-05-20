@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.IO;
 
 namespace RabbitSender
 {
@@ -19,11 +20,11 @@ namespace RabbitSender
 
             ITestEngine testEngine = TestEngineActivator.CreateInstance();
 
-            var filterService = testEngine.Services.GetService<ITestFilterService>();
-            var filterBuilder = filterService.GetTestFilterBuilder();
-            filterBuilder.AddTest("SystemUnderTest.TestClass.PassingTest");
+            string baseDirectory = @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\";
 
-            TestPackage package = new TestPackage(@"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\SystemUnderTest.dll");
+            var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories);
+
+            TestPackage package = new TestPackage(files);
 
             ITestRunner runner = testEngine.GetRunner(package);
 

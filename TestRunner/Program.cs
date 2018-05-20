@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MessageModels;
 using NUnit.Engine;
 using System.Xml;
-
+using System.IO;
 
 namespace TestRunner
 {
@@ -24,11 +24,11 @@ namespace TestRunner
                     "test_responses",
                     ShutDown);
 
-            List<string> testAssemblies = new List<string>()
-            {
-                @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\SystemUnderTest.dll"
-            };
-            TestExecutor executor = new TestExecutor(testAssemblies);
+            string baseDirectory = @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\";
+
+            var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories).ToList();
+
+            TestExecutor executor = new TestExecutor(files);
 
             _helper.Subscribe<RunTest>((m) =>
             {
