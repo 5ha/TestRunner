@@ -7,19 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemUnderTest", "SystemUn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner", "TestRunner\TestRunner.csproj", "{5DAE05A8-B447-4C7F-99FB-AE0F3D120177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePublisher", "MessagePublisher\MessagePublisher.csproj", "{F710CE91-A970-479D-A3E5-4A035385B3B5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageModels", "MessageModels\MessageModels.csproj", "{2515EBDF-3275-4934-85A1-CB7BFC166DD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitSender", "RabbitSender\RabbitSender.csproj", "{43B63763-7EBC-48FF-A535-29AE2C0CE874}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitReceiverBlue", "RabbitReceiverBlue\RabbitReceiverBlue.csproj", "{37CA622D-F578-4E6B-94FF-95CEB273D977}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitReceiverGreen", "RabbitReceiverGreen\RabbitReceiverGreen.csproj", "{0213DC58-7E3A-45C2-BDE7-7291DFDCED40}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportService", "TransportService\TransportService.csproj", "{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitReceiverBlueB", "RabbitReceiverBlueB\RabbitReceiverBlueB.csproj", "{D7E36CB7-F7B9-4C2E-A4E1-5D4E2A642273}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +27,6 @@ Global
 		{5DAE05A8-B447-4C7F-99FB-AE0F3D120177}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DAE05A8-B447-4C7F-99FB-AE0F3D120177}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DAE05A8-B447-4C7F-99FB-AE0F3D120177}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F710CE91-A970-479D-A3E5-4A035385B3B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F710CE91-A970-479D-A3E5-4A035385B3B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F710CE91-A970-479D-A3E5-4A035385B3B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F710CE91-A970-479D-A3E5-4A035385B3B5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2515EBDF-3275-4934-85A1-CB7BFC166DD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2515EBDF-3275-4934-85A1-CB7BFC166DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2515EBDF-3275-4934-85A1-CB7BFC166DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,22 +35,10 @@ Global
 		{43B63763-7EBC-48FF-A535-29AE2C0CE874}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43B63763-7EBC-48FF-A535-29AE2C0CE874}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43B63763-7EBC-48FF-A535-29AE2C0CE874}.Release|Any CPU.Build.0 = Release|Any CPU
-		{37CA622D-F578-4E6B-94FF-95CEB273D977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{37CA622D-F578-4E6B-94FF-95CEB273D977}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{37CA622D-F578-4E6B-94FF-95CEB273D977}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{37CA622D-F578-4E6B-94FF-95CEB273D977}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0213DC58-7E3A-45C2-BDE7-7291DFDCED40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0213DC58-7E3A-45C2-BDE7-7291DFDCED40}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0213DC58-7E3A-45C2-BDE7-7291DFDCED40}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0213DC58-7E3A-45C2-BDE7-7291DFDCED40}.Release|Any CPU.Build.0 = Release|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7E36CB7-F7B9-4C2E-A4E1-5D4E2A642273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7E36CB7-F7B9-4C2E-A4E1-5D4E2A642273}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7E36CB7-F7B9-4C2E-A4E1-5D4E2A642273}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7E36CB7-F7B9-4C2E-A4E1-5D4E2A642273}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
