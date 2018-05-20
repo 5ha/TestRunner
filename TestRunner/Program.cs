@@ -24,9 +24,7 @@ namespace TestRunner
                     "test_responses",
                     ShutDown);
 
-            string baseDirectory = @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\";
-
-            var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories).ToList();
+            var files = Directory.GetFiles(args[0], "*.dll", SearchOption.AllDirectories).ToList();
 
             TestExecutor executor = new TestExecutor(files);
 
