@@ -16,13 +16,16 @@ namespace TransportService
         private string _requestExchange;
         private string _requestPath;
         private string _responseExchange;
+        private string _responsePath;
         private Action _shutdownAction;
 
-        public TestClientHelper(string requestExchange, string requestPath, string responseExchange, Action shutdownAction)
+        public TestClientHelper(string requestExchange, string requestPath, 
+            string responseExchange, string responsePath, Action shutdownAction)
         {
             _requestExchange = requestExchange;
             _requestPath = requestPath;
             _responseExchange = responseExchange;
+            _responsePath = responsePath;
             _shutdownAction = shutdownAction;
         }
 
@@ -46,7 +49,7 @@ namespace TransportService
             {
                 if (__responseConnector == null)
                 {
-                    __responseConnector = new ConnectorBase(_responseExchange, string.Empty);
+                    __responseConnector = new ConnectorBase(_responseExchange, _responsePath);
                 }
                 return __responseConnector;
             }

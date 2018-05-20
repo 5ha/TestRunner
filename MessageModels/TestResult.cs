@@ -4,6 +4,6 @@ namespace MessageModels
 {
     public class TestResult
     {
-        XmlNode Result { get; set; }
+        public XmlNode Result { get; set; }
     }
 }

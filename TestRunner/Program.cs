@@ -20,7 +20,9 @@ namespace TestRunner
                 = new TransportService.TestClientHelper(
                     "test_requests", 
                     "Blue", 
-                    "test_responses", ShutDown);
+                    "test_responses", 
+                    "test_responses",
+                    ShutDown);
 
             List<string> testAssemblies = new List<string>()
             {
@@ -36,6 +38,8 @@ namespace TestRunner
                 var responseNode = responseXML.SelectSingleNode("//test-case");
                 var testResult = responseNode.Attributes["result"].Value;
                 Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
+
+                _helper.SendTestResult(new TestResult { Result = responseXML });
             });
 
             Console.WriteLine("Listening ...");
