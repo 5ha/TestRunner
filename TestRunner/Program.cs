@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MessageModels;
 using NUnit.Engine;
+using System.Xml;
 
 
 namespace TestRunner
@@ -12,36 +14,39 @@ namespace TestRunner
     {
         static void Main(string[] args)
         {
-            ITestEngine testEngine = TestEngineActivator.CreateInstance();
 
-            var filterService = testEngine.Services.GetService<ITestFilterService>();
-            var filterBuilder = filterService.GetTestFilterBuilder();
-            filterBuilder.AddTest("SystemUnderTest.TestClass.PassingTest");
+            TransportService.Helper helper = new TransportService.Helper("Blue");
 
-            TestPackage package = new TestPackage(@"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\SystemUnderTest.dll");
+            List<string> testAssemblies = new List<string>()
+            {
+                @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\SystemUnderTest.dll"
+            };
+            TestExecutor executor = new TestExecutor(testAssemblies);
 
-            ITestRunner runner = testEngine.GetRunner(package);
+            helper.Subscribe<RunTest>((m) =>
+            {
+                Console.WriteLine($"Running {m.FullName} ...");
+                var responseXML = executor.Execute(m);
 
-            var res = runner.Run(new Listener(), filterBuilder.GetFilter());
+                var responseNode = responseXML.SelectSingleNode("//test-case");
+                var testResult = responseNode.Attributes["result"].Value;
+                Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
+            }, () => {
+                Console.WriteLine("Environment exiting.");
+                helper.Dispose();
+                Environment.Exit(0);
+            });
 
-            //var resultService = testEngine.Services.GetService<IResultService>();
-
-            //foreach(var result in resultService.Formats)
-            //{
-            //    Console.WriteLine(result);
-            //}
-
-
-            //var tests = runner.Explore(TestFilter.Empty);
-
-            //var filter = new TestFilter()
-
-
-            Console.ReadLine();
+            Console.WriteLine("Listening ...");
         }
 
 
+
     }
+
+
+
+    
 
     public class Listener : ITestEventListener
     {

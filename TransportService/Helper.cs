@@ -69,7 +69,9 @@ namespace TransportService
 
             EnsureTransport();
             CancellationTokenSource cancelShutdown = new CancellationTokenSource();
-            ShutDown(cancelShutdown).ConfigureAwait(false);
+
+            // As we are starting up give extra time to get messages
+            ShutDown(TimeSpan.FromSeconds(30), cancelShutdown).ConfigureAwait(false);
 
             _consumer = new EventingBasicConsumer(_channel);
 
@@ -89,16 +91,16 @@ namespace TransportService
 
                 // Shutdown (unless we received a new message soon)
                 cancelShutdown = new CancellationTokenSource();
-                ShutDown(cancelShutdown).ConfigureAwait(false);
+                ShutDown(TimeSpan.FromSeconds(5), cancelShutdown).ConfigureAwait(false);
             };
             _channel.BasicConsume(queue: _pathName,
                                  autoAck: false,
                                  consumer: _consumer);
         }
 
-        private async Task ShutDown(CancellationTokenSource cancellationSource)
+        private async Task ShutDown(TimeSpan delay, CancellationTokenSource cancellationSource)
         {
-            await Task.Delay(5000); // Give the caller 5 seconds to cancel
+            await Task.Delay(delay); // Give the caller some time to cancel to cancel
             if (!cancellationSource.IsCancellationRequested)
             {
                 Console.WriteLine("No more messages .. shutting down");

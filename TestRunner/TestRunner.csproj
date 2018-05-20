@@ -59,10 +59,21 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MessageModels\MessageModels.csproj">
+      <Project>{2515ebdf-3275-4934-85a1-cb7bfc166dd4}</Project>
+      <Name>MessageModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TransportService\TransportService.csproj">
+      <Project>{77f45f11-40ae-41c0-9ccc-3ce1d0ea80fe}</Project>
+      <Name>TransportService</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

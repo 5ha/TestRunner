@@ -16,7 +16,6 @@ namespace RabbitSender
         {
 
             TransportService.Helper helperBlue = new TransportService.Helper("Blue");
-            TransportService.Helper helperGreen = new TransportService.Helper("Green");
 
             ITestEngine testEngine = TestEngineActivator.CreateInstance();
 
@@ -39,14 +38,13 @@ namespace RabbitSender
                     FullName = n.Attributes["fullname"].Value
                 };
 
-                bus.Publish(message);
+                helperBlue.Send<RunTest>(message);
             }
 
             //helperBlue.TeardownTransport();
             //helperGreen.TeardownTransport();
 
             helperBlue.Dispose();
-            helperGreen.Dispose();
 
             Console.WriteLine(" Press [enter] to exit.");
         }
