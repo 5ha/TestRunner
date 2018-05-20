@@ -12,10 +12,15 @@ namespace TestRunner
 {
     class Program 
     {
+        private static TransportService.TestClientHelper _helper;
+
         static void Main(string[] args)
         {
-
-            TransportService.Helper helper = new TransportService.Helper("Blue");
+            _helper
+                = new TransportService.TestClientHelper(
+                    "test_requests", 
+                    "Blue", 
+                    "test_responses", ShutDown);
 
             List<string> testAssemblies = new List<string>()
             {
@@ -23,7 +28,7 @@ namespace TestRunner
             };
             TestExecutor executor = new TestExecutor(testAssemblies);
 
-            helper.Subscribe<RunTest>((m) =>
+            _helper.Subscribe<RunTest>((m) =>
             {
                 Console.WriteLine($"Running {m.FullName} ...");
                 var responseXML = executor.Execute(m);
@@ -31,22 +36,18 @@ namespace TestRunner
                 var responseNode = responseXML.SelectSingleNode("//test-case");
                 var testResult = responseNode.Attributes["result"].Value;
                 Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
-            }, () => {
-                Console.WriteLine("Environment exiting.");
-                helper.Dispose();
-                Environment.Exit(0);
             });
 
             Console.WriteLine("Listening ...");
         }
 
-
-
+        private static void ShutDown()
+        {
+            Console.WriteLine("Environment exiting.");
+            _helper.Dispose();
+            Environment.Exit(0);
+        }
     }
-
-
-
-    
 
     public class Listener : ITestEventListener
     {
