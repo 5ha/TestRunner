@@ -26,7 +26,7 @@ namespace TransportService
             {
                 if (__connection == null)
                 {
-                    __connection = new ConnectionFactory() { HostName = "localhost" }.CreateConnection();
+                    __connection = new ConnectionFactory() { HostName = "my-rabbit", UserName="remote", Password="remote" }.CreateConnection();
                 }
 
                 return __connection;

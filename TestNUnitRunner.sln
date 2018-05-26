@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitSender", "RabbitSende
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportService", "TransportService\TransportService.csproj", "{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{073CED0F-172A-4F1F-A997-4BEBAB2BC715}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerManager", "ContainerManager\ContainerManager.csproj", "{67DC6AD7-4BC4-408C-8368-A44929E9ED85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,10 @@ Global
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77F45F11-40AE-41C0-9CCC-3CE1D0EA80FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67DC6AD7-4BC4-408C-8368-A44929E9ED85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67DC6AD7-4BC4-408C-8368-A44929E9ED85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67DC6AD7-4BC4-408C-8368-A44929E9ED85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67DC6AD7-4BC4-408C-8368-A44929E9ED85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

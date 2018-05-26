@@ -39,7 +39,10 @@ namespace RabbitSender
                     FullName = n.Attributes["fullname"].Value
                 };
 
-                helperBlue.Send<RunTest>(message);
+                for (int i = 0; i < 10; i++)
+                {
+                    helperBlue.Send<RunTest>(message);
+                }
             }
 
             //helperBlue.TeardownTransport();

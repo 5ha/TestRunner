@@ -28,7 +28,7 @@ namespace TransportService
         {
             if (_channel != null) return;
 
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "my-rabbit" };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 

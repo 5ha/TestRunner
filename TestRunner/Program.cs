@@ -16,12 +16,17 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
+            string instanceName = args[0];
+            string requestQueueName = args[1];
+            string responseQueueName = args[2];
+            string directoryToSearch = args[3];
+            
             _helper
                 = new TransportService.TestClientHelper(
-                    "test_requests", 
-                    "Blue", 
-                    "test_responses", 
-                    "test_responses",
+                    requestQueueName,
+                    instanceName,
+                    responseQueueName,
+                    responseQueueName,
                     ShutDown);
 
             var files = Directory.GetFiles(args[0], "*.dll", SearchOption.AllDirectories).ToList();
@@ -37,7 +42,7 @@ namespace TestRunner
                 var testResult = responseNode.Attributes["result"].Value;
                 Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
 
-                _helper.SendTestResult(new TestResult { Result = responseXML });
+                _helper.SendTestResult(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
             });
 
             Console.WriteLine("Listening ...");

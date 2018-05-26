@@ -8,6 +8,7 @@ namespace MessageModels
 {
     public class RunTest
     {
+        public string Build { get; set; }
         public string FullName { get; set; }
     }
 }
