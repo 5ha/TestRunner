@@ -15,8 +15,18 @@ namespace RabbitSender
     {
         static void Main(string[] args)
         {
+            string build = args[0];
 
-            TransportService.Helper helperBlue = new TransportService.Helper("Blue");
+            TransportService.Helper helperBuild = new TransportService.Helper("build_queue");
+
+            List<string> commands = new List<string>
+            {
+                "TestRunner", build, "test_responses", "c:\\app"
+            };
+                
+            helperBuild.Send(new RunBuild {Build = build, Commands = commands, ContainerImage =  "testrunner"});
+
+            TransportService.Helper helperBlue = new TransportService.Helper(build);
 
             ITestEngine testEngine = TestEngineActivator.CreateInstance();
 
@@ -36,6 +46,7 @@ namespace RabbitSender
             {
                 RunTest message = new RunTest
                 {
+                    Build = build,
                     FullName = n.Attributes["fullname"].Value
                 };
 
@@ -49,6 +60,7 @@ namespace RabbitSender
             //helperGreen.TeardownTransport();
 
             helperBlue.Dispose();
+            helperBuild.Dispose();
 
             Console.WriteLine(" Press [enter] to exit.");
         }

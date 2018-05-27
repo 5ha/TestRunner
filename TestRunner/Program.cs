@@ -16,20 +16,20 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
-            string instanceName = args[0];
-            string requestQueueName = args[1];
-            string responseQueueName = args[2];
-            string directoryToSearch = args[3];
+            string instanceName = Environment.GetEnvironmentVariable("instance");
+            string requestQueueName = args[0];
+            string responseQueueName = args[1];
+            string directoryToSearch = args[2];
             
             _helper
                 = new TransportService.TestClientHelper(
                     requestQueueName,
-                    instanceName,
+                    requestQueueName,
                     responseQueueName,
                     responseQueueName,
                     ShutDown);
 
-            var files = Directory.GetFiles(args[0], "*.dll", SearchOption.AllDirectories).ToList();
+            var files = Directory.GetFiles(directoryToSearch, "*.dll", SearchOption.AllDirectories).ToList();
 
             TestExecutor executor = new TestExecutor(files);
 

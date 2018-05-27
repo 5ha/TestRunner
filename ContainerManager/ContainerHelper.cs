@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ContainerManager
 {
-    public class ContainerHelper
+    public class ContainerHelper : IDisposable
     {
         private DockerClientConfiguration __clientConfiguration;
         private DockerClientConfiguration _clientConfiguration
@@ -36,6 +37,7 @@ namespace ContainerManager
             }
         }
 
+
         public Task<IList<ContainerListResponse>> ListContainers(bool all = true)
         {
             return _client.Containers.ListContainersAsync(new ContainersListParameters()
@@ -56,13 +58,13 @@ namespace ContainerManager
             return FindContainer(name) != null;
         }
 
-        public CreateContainerResponse CreateContainer(string name)
+        public Task<CreateContainerResponse> CreateContainer(string image, string name, List<string> commands)
         {
             return _client.Containers.CreateContainerAsync(new CreateContainerParameters
             {
-                Image = "testrunner",
+                Image = image,
                 Name = name,
-                Cmd = new List<string> { "TestRunner", "c:\\app" },
+                Cmd = commands,
                 ArgsEscaped = false,
                 AttachStderr = false,
                 AttachStdin = false,
@@ -75,7 +77,7 @@ namespace ContainerManager
                     }
                 }
 
-            }).Result;
+            });
         }
 
         public Task<bool> StartContainer(string id)
@@ -83,11 +85,38 @@ namespace ContainerManager
             return _client.Containers.StartContainerAsync(id, new ContainerStartParameters() {
 
             });
+
+        }
+
+        public async Task<(string stdOut, string stdErr)> AwaitContainer(string id)
+        {
+                var config = new ContainerAttachParameters
+                {
+                    Stream = true,
+                    Stderr = true,
+                    Stdin = false,
+                    Stdout = true,
+                    Logs = "1"
+                };
+
+                (string stdOut, string stdErr) containerResult;
+
+                using (var stream = await _client.Containers.AttachContainerAsync(id, false, config, default(CancellationToken)))
+                {
+                    containerResult = await stream.ReadOutputToEndAsync(default(CancellationToken));
+                }
+
+                return containerResult;
         }
 
         public Task RemoveContainer(string id)
         {
             return _client.Containers.RemoveContainerAsync(id, new ContainerRemoveParameters { Force = true });
+        }
+
+        public void Dispose()
+        {
+            //TODO: stop any running container
         }
     }
 }
