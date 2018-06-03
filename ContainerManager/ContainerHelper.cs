@@ -1,7 +1,10 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using SharpCompress.Common;
+using SharpCompress.Writers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -114,9 +117,70 @@ namespace ContainerManager
             return _client.Containers.RemoveContainerAsync(id, new ContainerRemoveParameters { Force = true });
         }
 
+        public async Task BuildImage(string contextRoot, string repository, string image, string tag)
+        {
+            var tarFileName = "build.tar.gz";
+            var tarFilePath = Path.Combine(Path.GetTempPath(), tarFileName);
+            if (File.Exists(tarFilePath)) File.Delete(tarFilePath);
+
+            TarFolder(tarFilePath, contextRoot);
+
+            var parameters = new ImageBuildParameters
+            {
+                Tags = new List<string> { $"{repository}/{image}:{tag}" }
+            };
+
+            using (FileStream fs = new FileStream(tarFilePath, FileMode.Open))
+            {
+                var res = await _client.Images.BuildImageFromDockerfileAsync(fs, parameters);
+
+                TextReader reader = new StreamReader(res);
+                var s = reader.ReadToEnd();
+            }
+        }
+
+        public void TarFolder(string archivePath, string tarRoot)
+        {
+            using (Stream stream = File.OpenWrite(archivePath))
+            using (var writer = WriterFactory.Open(stream, ArchiveType.Tar, CompressionType.GZip))
+            {
+                writer.WriteAll(tarRoot, "*", SearchOption.AllDirectories);
+            }
+        }
+
+
+        public async Task PublishImage(string image)
+        {
+            var authConfig = new AuthConfig()
+            {
+                Username = "shawnseabrook",
+                Password = "r8d1M5prvHZtIydkCNeS"
+            };
+
+            var parameters = new ImagePushParameters()
+            {
+
+            };
+
+            await _client.Images.PushImageAsync(image, parameters, authConfig, new ProgressMonitor());
+        }
+
         public void Dispose()
         {
             //TODO: stop any running container
         }
+
+        
+
+        private class ProgressMonitor : IProgress<JSONMessage>
+        {
+            public void Report(JSONMessage value)
+            {
+                var x = value.ProgressMessage;
+                //throw new NotImplementedException();
+            }
+        }
     }
+
+
 }
