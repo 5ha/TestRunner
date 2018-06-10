@@ -25,6 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F4A80CCA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerManagerTests", "ContainerManagerTests\ContainerManagerTests.csproj", "{9F44520A-5BDB-444F-A966-89299FC0B7C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiQ", "HiQ\HiQ.csproj", "{886E8F1B-8D34-4612-A459-2659B392A910}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiQTests", "HiQTests\HiQTests.csproj", "{21CAF064-1FFE-491A-9960-5A4578AC15ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +75,14 @@ Global
 		{9F44520A-5BDB-444F-A966-89299FC0B7C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F44520A-5BDB-444F-A966-89299FC0B7C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F44520A-5BDB-444F-A966-89299FC0B7C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886E8F1B-8D34-4612-A459-2659B392A910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886E8F1B-8D34-4612-A459-2659B392A910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886E8F1B-8D34-4612-A459-2659B392A910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886E8F1B-8D34-4612-A459-2659B392A910}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
