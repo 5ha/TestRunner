@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HiQTests
@@ -120,7 +121,7 @@ namespace HiQTests
         }
 
        [Test]
-        public void TestSendReceive()
+        public async Task TestSendReceive()
         {
             IQueueBuilder builder;
 
@@ -132,11 +133,26 @@ namespace HiQTests
             var receiver = builder.ConfigureTransport(_hostName, _userName, _password)
                 .IReceiveFrom(_queueName).IReceiveForever().Build();
 
-            //receiver.Receive<String>(() => { });
+            String message = "Test Message";
 
-            sender.Send<String>("Test Message");
+            sender.Send<String>(message);
 
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(2000);
 
+            Func<string> subscriptionFunction = () =>
+            {
+                String result = null;
+                receiver.Receive<String>((s) => { result = s; });
+                while (string.IsNullOrEmpty(result))
+                {
+                    Task.Delay(100);
+                }
+                return result;
+            };
+
+            var res = await Task<string>.Run(subscriptionFunction, cancellationTokenSource.Token);
+
+            Assert.AreEqual(message, res);
         }
     }
 }
