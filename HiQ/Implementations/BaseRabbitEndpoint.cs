@@ -61,6 +61,11 @@ namespace HiQ.Implementations
             }
         }
 
+        public void DeleteQueue()
+        {
+            Channel.QueueDelete(_pathName);
+        }
+
 
 
         public void Dispose()

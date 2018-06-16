@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -78,6 +79,10 @@
     <ProjectReference Include="..\MessageModels\MessageModels.csproj">
       <Project>{2515ebdf-3275-4934-85a1-cb7bfc166dd4}</Project>
       <Name>MessageModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NUnitUtils\NUnitUtils.csproj">
+      <Project>{641094C3-707C-4803-85D9-F7C80BE51232}</Project>
+      <Name>NUnitUtils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

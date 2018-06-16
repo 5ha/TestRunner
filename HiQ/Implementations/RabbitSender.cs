@@ -22,10 +22,5 @@ namespace HiQ.Implementations
                                  basicProperties: null,
                                  body: body);
         }
-
-        public void DeleteQueue()
-        {
-            Channel.QueueDelete(_pathName);
-        }
     }
 }

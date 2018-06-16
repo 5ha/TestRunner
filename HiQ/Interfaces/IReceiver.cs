@@ -9,5 +9,7 @@ namespace HiQ.Interfaces
     public interface IReceiver : IDisposable
     {
         void Receive<TMessageType>(Action<TMessageType> onReceived);
+
+        void DeleteQueue();
     }
 }

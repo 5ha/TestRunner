@@ -2,6 +2,7 @@
 using HiQ.Interfaces;
 using MessageModels;
 using NUnit.Engine;
+using NUnitUtils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -81,31 +82,11 @@ namespace RabbitSender
 
         private static void SendTestInstructions(ISender sender, string build, string directoryToSearch)
         {
-            string baseDirectory = @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest";
-
-            var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories);
-
-            TestPackage package = new TestPackage(files);
-
-            using (ITestRunner runner = testEngine.GetRunner(package))
+            TestExplorer testExplorer = new TestExplorer();
+            var tests = testExplorer.GetTests(build, directoryToSearch);
+            foreach(var test in tests)
             {
-                var testSuites = runner.Explore(TestFilter.Empty);
-
-                var testCases = testSuites.SelectNodes("//test-case");
-
-                foreach (XmlNode n in testCases)
-                {
-                    RunTest message = new RunTest
-                    {
-                        Build = build,
-                        FullName = n.Attributes["fullname"].Value
-                    };
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        sender.Send<RunTest>(message);
-                    }
-                }
+                sender.Send(test);
             }
         }
     }

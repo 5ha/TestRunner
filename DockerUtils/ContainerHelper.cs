@@ -117,7 +117,7 @@ namespace DockerUtils
             return _client.Containers.RemoveContainerAsync(id, new ContainerRemoveParameters { Force = true });
         }
 
-        public async Task BuildImage(string contextRoot, string repository, string image, string tag)
+        public async Task<string> BuildImage(string contextRoot, string repository, string image, string tag)
         {
             var tarFileName = "build.tar.gz";
             var tarFilePath = Path.Combine(Path.GetTempPath(), tarFileName);
@@ -135,7 +135,7 @@ namespace DockerUtils
                 var res = await _client.Images.BuildImageFromDockerfileAsync(fs, parameters);
 
                 TextReader reader = new StreamReader(res);
-                var s = reader.ReadToEnd();
+                return reader.ReadToEnd();
             }
         }
 

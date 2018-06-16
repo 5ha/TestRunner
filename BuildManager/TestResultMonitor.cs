@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 
 namespace BuildManager
 {
-    public class TestResultMonitor : IObservable<TestResult>
+    public class TestResultMonitor : IObservable<TestExecutionResult>
     {
         public TestResultMonitor()
         {
-            _observers = new List<IObserver<TestResult>>();
+            _observers = new List<IObserver<TestExecutionResult>>();
         }
 
-        private List<IObserver<TestResult>> _observers;
+        private List<IObserver<TestExecutionResult>> _observers;
 
-        public IDisposable Subscribe(IObserver<TestResult> observer)
+        public IDisposable Subscribe(IObserver<TestExecutionResult> observer)
         {
             if (!_observers.Contains(observer)) _observers.Add(observer);
 
             return new Unsubscriber(_observers, observer);
         }
 
-        internal void notifyNext(TestResult testResult)
+        internal void notifyNext(TestExecutionResult testResult)
         {
             foreach(var observer in _observers)
             {
@@ -41,10 +41,10 @@ namespace BuildManager
 
         private class Unsubscriber : IDisposable
         {
-            private readonly List<IObserver<TestResult>> _observers;
-            private readonly IObserver<TestResult> _observer;
+            private readonly List<IObserver<TestExecutionResult>> _observers;
+            private readonly IObserver<TestExecutionResult> _observer;
 
-            public Unsubscriber(List<IObserver<TestResult>> observers, IObserver<TestResult> observer)
+            public Unsubscriber(List<IObserver<TestExecutionResult>> observers, IObserver<TestExecutionResult> observer)
             {
                 _observers = observers;
                 _observer = observer;

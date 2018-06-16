@@ -10,6 +10,6 @@ namespace DataEF
 {
     public class BuildManagerContext : DbContext
     {
-        public DbSet<TestResult> TestResults { get; set; }
+        public DbSet<TestExecutionResult> TestResults { get; set; }
     }
 }

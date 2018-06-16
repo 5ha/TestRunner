@@ -1,4 +1,5 @@
-﻿using DockerUtils;
+﻿using Docker.DotNet.Models;
+using DockerUtils;
 using MessageModels;
 using System;
 using System.Collections.Concurrent;
@@ -99,11 +100,20 @@ namespace ContainerManager
                 await helper.RemoveContainer(containerName);
             }
 
-            var res = await helper.CreateContainer(build.ContainerImage, containerName, build.Commands);
+            CreateContainerResponse createContainerResponse = null;
+            try
+            {
+                createContainerResponse = await helper.CreateContainer(build.ContainerImage, containerName, build.Commands);
+            }
+            catch (Exception ex)
+            {
+                stdErr += ex.Message;
+                stdErr += ex.StackTrace;
+            }
 
-            await helper.StartContainer(res.ID);
+            await helper.StartContainer(createContainerResponse.ID);
 
-            (stdOut, stdErr) = await helper.AwaitContainer(res.ID);
+            (stdOut, stdErr) = await helper.AwaitContainer(createContainerResponse.ID);
 
             return (stdOut, stdErr);
         }

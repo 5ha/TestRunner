@@ -9,7 +9,7 @@ namespace DataEF
 {
     public class TestResultRepository
     {
-        public void Save(TestResult testResult)
+        public void Save(TestExecutionResult testResult)
         {
             using(BuildManagerContext context = new BuildManagerContext())
             {

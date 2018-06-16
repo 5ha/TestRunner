@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BuildManager.Model
 {
-    public class TestResult
+    public class TestExecutionResult
     {
         public int TestResultId { get; set; }
         public DateTime DateUtc { get; set; }
