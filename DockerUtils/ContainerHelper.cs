@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ContainerManager
+namespace DockerUtils
 {
     public class ContainerHelper : IDisposable
     {

@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiQ", "HiQ\HiQ.csproj", "{8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiQTests", "HiQTests\HiQTests.csproj", "{21CAF064-1FFE-491A-9960-5A4578AC15ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockerUtils", "DockerUtils\DockerUtils.csproj", "{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21CAF064-1FFE-491A-9960-5A4578AC15ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -55,6 +55,10 @@
       <Project>{67dc6ad7-4bc4-408c-8368-a44929e9ed85}</Project>
       <Name>ContainerManager</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DockerUtils\DockerUtils.csproj">
+      <Project>{23bfbe6b-bd87-45f0-a939-0e9fa30b1783}</Project>
+      <Name>DockerUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
