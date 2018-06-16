@@ -52,7 +52,7 @@ namespace ContainerManager
 
         private Task<RunBuild> GetCurrentBuild()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
 
                 RunBuild currentBuild = null;
@@ -60,7 +60,7 @@ namespace ContainerManager
                 while (currentBuild == null)
                 {
                     currentBuild = Builds.FirstOrDefault();
-                    if (currentBuild == null) Task.Delay(1000);
+                    if (currentBuild == null) await Task.Delay(1000);
                 }
 
                 return currentBuild;
