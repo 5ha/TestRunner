@@ -1,12 +1,10 @@
-﻿using System;
+﻿using HiQ.Builders;
+using HiQ.Interfaces;
+using MessageModels;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Docker.DotNet;
-using Docker.DotNet.Models;
-using MessageModels;
 
 namespace ContainerManager
 {
@@ -22,52 +20,56 @@ namespace ContainerManager
         static async Task MainAsync(string[] args)
         {
             int numberOfProcesses = Int32.Parse(args[0]);
-            TransportService.Helper helperBuild = new TransportService.Helper("build_queue");
-            CancellationTokenSource cancellation = new CancellationTokenSource();
 
-            for(int i = 0; i < numberOfProcesses; i++)
+            // Initialise processes
+            CancellationTokenSource cancellation = new CancellationTokenSource();
+            for (int i = 0; i < numberOfProcesses; i++)
             {
                 var proc = new Process($"process{i}", cancellation.Token);
                 processes.Add(proc);
                 proc.Initialise();
             }
 
-            RunBuild(new RunBuild {
-                ContainerImage = "testrunner",
-                Build = "Build1",
-                Commands = new List<string>
-                {
-                    "TestRunner","Build1","test_responses","c:\\app"
-                }
+            // Subscribe to Build Messages
+            IQueueBuilder queueBuilder = new RabbitBuilder();
+            IReceiver receiver = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+                .IReceiveFrom("build_queue")
+                .IReceiveForever()
+                .Build();
+
+            receiver.Receive<RunBuild>((m) => {
+                RunBuild(m);
             });
 
             Console.ReadLine();
+            Console.WriteLine("Cancelling processes ...");
             cancellation.Cancel();
+            Console.WriteLine("Processes cancelled.");
         }
 
         public static void RunBuild(RunBuild build)
         {
             List<Task> tasks = new List<Task>();
 
-            Console.Write("Addin Builds");
+            Console.WriteLine($"Running {build.Build}");
 
             foreach(var proc in processes)
             {
                 tasks.Add(proc.RunBuild(build));
             }
 
-            Console.Write("Waiting for tasks");
+            Console.WriteLine("Waiting for tasks");
 
             Task.WaitAny(tasks.ToArray());
 
-            Console.Write("A task has completed");
+            Console.WriteLine("A task has completed");
 
             foreach (var proc in processes)
             {
                 proc.RunBuild(build);
             }
 
-            Console.Write("Removing build");
+            Console.WriteLine("All completed ...removing build");
         }
 
     }

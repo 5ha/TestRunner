@@ -66,13 +66,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HiQ\HiQ.csproj">
+      <Project>{886e8f1b-8d34-4612-a459-2659b392a910}</Project>
+      <Name>HiQ</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MessageModels\MessageModels.csproj">
       <Project>{2515ebdf-3275-4934-85a1-cb7bfc166dd4}</Project>
       <Name>MessageModels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TransportService\TransportService.csproj">
-      <Project>{77f45f11-40ae-41c0-9ccc-3ce1d0ea80fe}</Project>
-      <Name>TransportService</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

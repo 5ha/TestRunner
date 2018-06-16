@@ -7,33 +7,43 @@ using MessageModels;
 using NUnit.Engine;
 using System.Xml;
 using System.IO;
+using HiQ.Interfaces;
+using HiQ.Builders;
 
 namespace TestRunner
 {
     class Program 
     {
-        private static TransportService.TestClientHelper _helper;
+        static ISender sender;
+        static IReceiver receiver;
 
         static void Main(string[] args)
         {
             string instanceName = Environment.GetEnvironmentVariable("instance");
-            string requestQueueName = args[0];
-            string responseQueueName = args[1];
-            string directoryToSearch = args[2];
-            
-            _helper
-                = new TransportService.TestClientHelper(
-                    requestQueueName,
-                    requestQueueName,
-                    responseQueueName,
-                    responseQueueName,
-                    ShutDown);
+            string queueServer = args[0];
+            string queueUsername = args[1];
+            string queuePassword = args[2];
+            string requestQueueName = args[3];
+            string responseQueueName = args[4];
+            string directoryToSearch = args[5];
+
+            IQueueBuilder queueBuilder = new RabbitBuilder();
+            receiver =
+                queueBuilder.ConfigureTransport(queueServer, queueUsername, queuePassword)
+                .IReceiveFrom(requestQueueName)
+                .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(5), ShutDown)
+                .Build();
+
+            queueBuilder = new RabbitBuilder();
+            sender = queueBuilder.ConfigureTransport(queueServer, queueUsername, queuePassword)
+                .ISendTo(responseQueueName)
+                .Build();
 
             var files = Directory.GetFiles(directoryToSearch, "*.dll", SearchOption.AllDirectories).ToList();
 
             TestExecutor executor = new TestExecutor(files);
 
-            _helper.Subscribe<RunTest>((m) =>
+            receiver.Receive<RunTest>((m) =>
             {
                 Console.WriteLine($"Running {m.FullName} ...");
                 var responseXML = executor.Execute(m);
@@ -42,7 +52,7 @@ namespace TestRunner
                 var testResult = responseNode.Attributes["result"].Value;
                 Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
 
-                _helper.SendTestResult(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
+                sender.Send(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
             });
 
             Console.WriteLine("Listening ...");
@@ -50,8 +60,9 @@ namespace TestRunner
 
         private static void ShutDown()
         {
+            receiver.Dispose();
+            sender.Dispose();
             Console.WriteLine("Environment exiting.");
-            _helper.Dispose();
             Environment.Exit(0);
         }
     }

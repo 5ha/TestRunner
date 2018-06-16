@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HiQ.Interfaces
 {
-    public interface IReceiver
+    public interface IReceiver : IDisposable
     {
         void Receive<TMessageType>(Action<TMessageType> onReceived);
     }

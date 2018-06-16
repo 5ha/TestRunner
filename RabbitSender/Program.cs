@@ -1,72 +1,115 @@
-﻿using MessageModels;
+﻿using HiQ.Builders;
+using HiQ.Interfaces;
+using MessageModels;
 using NUnit.Engine;
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using System.IO;
+using System.Xml;
 
 namespace RabbitSender
 {
     class Program
     {
+        static ISender BuildInstructionSender;
+        static ISender TestInstructionSender;
+        static string directoryToSearch = @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest";
+        static ITestEngine testEngine;
+
         static void Main(string[] args)
         {
-            string build = args[0];
+            testEngine = TestEngineActivator.CreateInstance();
 
-            TransportService.Helper helperBuild = new TransportService.Helper("build_queue");
+            Console.WriteLine("Configuring Build Instruction Sender");
+            BuildInstructionSender = ConfigureSender("build_queue");
 
+            string build;
+
+            do
+            {
+                Console.WriteLine("Type in a build number and press enter to run the build");
+                Console.WriteLine("Press enter on it's own to quit");
+                build = Console.ReadLine();
+                if (!string.IsNullOrEmpty(build))
+                {
+                    Console.WriteLine("Please wait ...");
+                    KickOffBuild(build);
+                    Console.WriteLine("OK");
+                    Console.WriteLine("===================================================");
+                }
+            } while (!string.IsNullOrEmpty(build));
+
+
+            Console.WriteLine("Disposing Build Instruction Sender");
+            BuildInstructionSender.Dispose();
+            TestInstructionSender.Dispose();
+            Console.WriteLine("All done");
+
+            Console.WriteLine(" Press [enter] to exit.");
+            Console.ReadLine();
+        }
+
+        private static void KickOffBuild(string build)
+        {
+            Console.WriteLine("Configuring Test Instruction Sender");
+            TestInstructionSender = ConfigureSender($"{build}_request");
+
+            Console.WriteLine("Sending Test Instructions");
+            SendTestInstructions(TestInstructionSender, build, directoryToSearch);
+
+            Console.WriteLine("Sending Build Instruction");
+            BuildInstructionSender.Send(CreateBuildInstruction(build));
+        }
+
+        private static ISender ConfigureSender(string queue)
+        {
+            IQueueBuilder queueBuilder = new RabbitBuilder();
+            ISender sender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+                .ISendTo(queue)
+                .Build();
+            return sender;
+        }
+
+        private static RunBuild CreateBuildInstruction(string build)
+        {
             List<string> commands = new List<string>
             {
-                "TestRunner", build, "test_responses", "c:\\app"
+                "TestRunner", "my-rabbit", "remote", "remote", $"{build}_request", $"{build}_response", "c:\\app"
             };
-                
-            helperBuild.Send(new RunBuild {Build = build, Commands = commands, ContainerImage =  "testrunner"});
 
-            TransportService.Helper helperBlue = new TransportService.Helper(build);
+            return new RunBuild { Build = build, Commands = commands, ContainerImage = "testrunner" };
+        }
 
-            ITestEngine testEngine = TestEngineActivator.CreateInstance();
+        private static void SendTestInstructions(ISender sender, string build, string directoryToSearch)
+        {
 
-            string baseDirectory = @"C:\\Users\\shawn\\source\\repos\\TestNUnitRunner\\SystemUnderTest\\bin\\Debug\\";
+
+            string baseDirectory = @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest";
 
             var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories);
 
             TestPackage package = new TestPackage(files);
 
-            ITestRunner runner = testEngine.GetRunner(package);
-
-            var testSuites = runner.Explore(TestFilter.Empty);
-
-            var testCases = testSuites.SelectNodes("//test-case");
-
-            foreach (XmlNode n in testCases)
+            using (ITestRunner runner = testEngine.GetRunner(package))
             {
-                RunTest message = new RunTest
-                {
-                    Build = build,
-                    FullName = n.Attributes["fullname"].Value
-                };
+                var testSuites = runner.Explore(TestFilter.Empty);
 
-                for (int i = 0; i < 10; i++)
+                var testCases = testSuites.SelectNodes("//test-case");
+
+                foreach (XmlNode n in testCases)
                 {
-                    helperBlue.Send<RunTest>(message);
+                    RunTest message = new RunTest
+                    {
+                        Build = build,
+                        FullName = n.Attributes["fullname"].Value
+                    };
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        TestInstructionSender.Send<RunTest>(message);
+                    }
                 }
             }
-
-            //helperBlue.TeardownTransport();
-            //helperGreen.TeardownTransport();
-
-            helperBlue.Dispose();
-            helperBuild.Dispose();
-
-            Console.WriteLine(" Press [enter] to exit.");
         }
-
-
-
-
     }
 }

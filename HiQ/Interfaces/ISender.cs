@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HiQ.Interfaces
 {
-    public interface ISender
+    public interface ISender : IDisposable
     {
         void Send<TMessageType>(TMessageType message);
 
