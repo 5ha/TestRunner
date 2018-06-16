@@ -12,7 +12,6 @@ namespace RabbitSender
     class Program
     {
         static ISender BuildInstructionSender;
-        static ISender TestInstructionSender;
         static string directoryToSearch = @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest";
         static ITestEngine testEngine;
 
@@ -42,7 +41,6 @@ namespace RabbitSender
 
             Console.WriteLine("Disposing Build Instruction Sender");
             BuildInstructionSender.Dispose();
-            TestInstructionSender.Dispose();
             Console.WriteLine("All done");
 
             Console.WriteLine(" Press [enter] to exit.");
@@ -52,13 +50,14 @@ namespace RabbitSender
         private static void KickOffBuild(string build)
         {
             Console.WriteLine("Configuring Test Instruction Sender");
-            TestInstructionSender = ConfigureSender($"{build}_request");
+            using (var TestInstructionSender = ConfigureSender($"{build}_request"))
+            {
+                Console.WriteLine("Sending Test Instructions");
+                SendTestInstructions(TestInstructionSender, build, directoryToSearch);
 
-            Console.WriteLine("Sending Test Instructions");
-            SendTestInstructions(TestInstructionSender, build, directoryToSearch);
-
-            Console.WriteLine("Sending Build Instruction");
-            BuildInstructionSender.Send(CreateBuildInstruction(build));
+                Console.WriteLine("Sending Build Instruction");
+                BuildInstructionSender.Send(CreateBuildInstruction(build));
+            }
         }
 
         private static ISender ConfigureSender(string queue)
@@ -82,8 +81,6 @@ namespace RabbitSender
 
         private static void SendTestInstructions(ISender sender, string build, string directoryToSearch)
         {
-
-
             string baseDirectory = @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest";
 
             var files = Directory.GetFiles(baseDirectory, "*.dll", SearchOption.AllDirectories);
@@ -106,7 +103,7 @@ namespace RabbitSender
 
                     for (int i = 0; i < 10; i++)
                     {
-                        TestInstructionSender.Send<RunTest>(message);
+                        sender.Send<RunTest>(message);
                     }
                 }
             }

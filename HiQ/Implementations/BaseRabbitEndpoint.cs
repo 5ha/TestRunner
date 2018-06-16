@@ -16,7 +16,7 @@ namespace HiQ.Implementations
             _hostName = hostName;
             _userName = userName;
             _password = password;
-            _exchangeName = exchangeName;
+            _exchangeName = $"{exchangeName}_{Guid.NewGuid().ToString("N")}";
             _pathName = pathName;
         }
 
@@ -68,6 +68,7 @@ namespace HiQ.Implementations
             if (Channel != null)
             {
                 if (Channel.IsOpen)
+                    Channel.ExchangeDelete(_exchangeName);
                     Channel.Close();
 
                 Channel = null;
