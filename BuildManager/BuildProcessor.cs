@@ -25,7 +25,7 @@ namespace BuildManager
         private readonly string _build;
         private TestResultMonitor _testResultMonitor;
         private StatusMessageMonitor _statusMessageMonitor;
-        private Dictionary<string,string> _expectedTests;
+        private Dictionary<string, string> _expectedTests;
         private bool _allReceived = false;
 
         CancellationTokenSource _cancellationTokenSource;
@@ -60,12 +60,15 @@ namespace BuildManager
         public async Task StartBuild(string build)
         {
             // TODO: What if current build already exists
-            Console.WriteLine($"[{build}] Staring");
+
+            ReportStatus($"[{build}] Staring");
+
             // Create the docker image and add it to the repository
             var containerHelper = new ContainerHelper();
             var imageBuildResult = await containerHelper.BuildImage(_pathToBuildFolder, _repository, _image, _build);
-            Console.WriteLine("[{build}] Image Build Result: ");
-            Console.WriteLine(imageBuildResult);
+
+            ReportStatus("[{build}] Image Build Result: ");
+            ReportStatus(imageBuildResult);
             // TODO: Add to image repository
 
             // Add the build to the database
@@ -76,7 +79,7 @@ namespace BuildManager
             {
                 tests = testExplorer.GetTests(build, _testSearchDirectory);
             }
-                
+
             AddTestsToDictionary(_expectedTests, tests);
 
             // Configure receivers
@@ -84,16 +87,16 @@ namespace BuildManager
             testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(build));
 
             // Add all the tests to the queue
-            Console.WriteLine($"[{build}] Sending Test Instructions ...");
+            ReportStatus($"[{build}] Sending Test Instructions ...");
             testInstructionSender = ConfigureSender(QueueNames.TestRequest(build));
             SendTestInstructions(testInstructionSender, tests);
-            Console.WriteLine($"[{build}] Test Instructions sent.");
+            ReportStatus($"[{build}] Test Instructions sent.");
 
             // Add the build instruction to the queue
-            Console.WriteLine($"[{build}] Sending Build Instruction ...");
+            ReportStatus($"[{build}] Sending Build Instruction ...");
             buildInstructionSender = ConfigureSender(QueueNames.Build());
             buildInstructionSender.Send(CreateBuildInstruction(build));
-            Console.WriteLine($"[{build}] Build Instruction sent.");
+            ReportStatus($"[{build}] Build Instruction sent.");
 
             // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
             testResultReceiver.Receive<TestResult>(TestResultReceived);
@@ -105,12 +108,14 @@ namespace BuildManager
             // Notify cubscribers that the run is complete
             _testResultMonitor.notifyComplete();
 
-            Console.WriteLine($"[{build}] All complete.");
+            ReportStatus($"[{build}] All complete.");
+            _statusMessageMonitor.notifyComplete();
         }
 
         private Task TestsStillRunning(CancellationToken cancellationToken)
         {
-            return Task.Run(async () => {
+            return Task.Run(async () =>
+            {
                 while (!_allReceived && !cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(1000);
@@ -120,13 +125,14 @@ namespace BuildManager
         }
 
         private void StatusMessageReceived(StatusMessage message)
-        {
-            if (message.IsError)
+        { 
+            _statusMessageMonitor.notifyNext(message);
+
+            // if there is an error in the message stop everything because we have no guarantee
+            // that we will get all test results back
+            if (!string.IsNullOrEmpty(message.Error))
             {
-                _statusMessageMonitor.notifyError(message.Error);
-            } else
-            {
-                _statusMessageMonitor.notifyNext(message);
+                _allReceived = true; // TODO:  bit of a hack for the moment
             }
         }
 
@@ -153,7 +159,7 @@ namespace BuildManager
 
         private void AddTestsToDictionary(Dictionary<string, string> dict, List<RunTest> tests)
         {
-            foreach(var test in tests)
+            foreach (var test in tests)
             {
                 dict.Add(test.FullName, test.FullName);
             }
@@ -208,24 +214,53 @@ namespace BuildManager
             return _statusMessageMonitor.Subscribe(observer);
         }
 
+        private StatusMessage PrepareStatusMessage()
+        {
+            StatusMessage message = new StatusMessage
+            {
+                Machine = Environment.MachineName,
+                Application = "BuildManager"
+            };
+            return message;
+        }
+
+        private void ReportStatus(string message)
+        {
+            StatusMessage m = PrepareStatusMessage();
+            m.Message = message;
+            _statusMessageMonitor.notifyNext(m);
+        }
+
+        private void ReportError(string message)
+        {
+            StatusMessage m = PrepareStatusMessage();
+            m.Error = message;
+            _statusMessageMonitor.notifyNext(m);
+        }
+
         public void Dispose()
         {
             _cancellationTokenSource.Cancel();
 
-            if(testInstructionSender != null)
+            if (testInstructionSender != null)
             {
                 testInstructionSender.DeleteQueue();
                 testInstructionSender.Dispose();
             }
-            if(buildInstructionSender != null)
+            if (buildInstructionSender != null)
             {
                 // Don't delete this queue, it should be permanent
                 buildInstructionSender.Dispose();
             }
-            if(testResultReceiver != null)
+            if (testResultReceiver != null)
             {
                 testResultReceiver.DeleteQueue();
                 testResultReceiver.Dispose();
+            }
+            if(statusMessageReceiver != null)
+            {
+                statusMessageReceiver.DeleteQueue();
+                statusMessageReceiver.Dispose();
             }
         }
     }

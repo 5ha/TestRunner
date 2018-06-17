@@ -47,17 +47,19 @@ namespace ContainerManager
             Console.WriteLine("Processes cancelled.");
         }
 
+
+
         public static void RunBuild(RunBuild build)
         {
             IQueueBuilder queueBuilder = new RabbitBuilder();
-            ISender statusMessageSender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
-                .ISendTo(QueueNames.Status(build.Build))
-                .Build();
-
             List<Task> tasks = new List<Task>();
 
-            statusMessageSender.Send(new StatusMessage($"Starting build {build.Build}"));
-            // TODO: log this as well somewhere
+            using (ISender statusMessageSender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+                .ISendTo(QueueNames.Status(build.Build))
+                .Build())
+            {
+                SendStatusMessage(statusMessageSender, $"Starting build {build.Build}");
+            }
 
             foreach (var proc in processes)
             {
@@ -67,14 +69,31 @@ namespace ContainerManager
             // Wait for at least one task to complete this build before moving onto the next build
             Task.WaitAny(tasks.ToArray());
 
-            Console.WriteLine("A task has completed");
+            // Don't send anymore messages to the status queue after this point as it might have been removed already
+            // and we don't want to re-create it
+        }
 
-            //foreach (var proc in processes)
-            //{
-            //    proc.RunBuild(build);
-            //}
+        private static void SendStatusMessage(ISender sender, string message)
+        {
+            sender.Send(StatusReport(message));
+            Console.WriteLine(message);
+        }
 
-            statusMessageSender.Send(new StatusMessage($"Build in progress {build.Build}"));
+        private static StatusMessage PrepareStatusMessage()
+        {
+            StatusMessage message = new StatusMessage
+            {
+                Machine = Environment.MachineName,
+                Application = "ContainerManager"
+            };
+            return message;
+        }
+
+        private static StatusMessage StatusReport(string message)
+        {
+            StatusMessage m = PrepareStatusMessage();
+            m.Message = message;
+            return m;
         }
 
     }

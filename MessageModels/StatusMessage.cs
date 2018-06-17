@@ -8,18 +8,11 @@ namespace MessageModels
 {
     public class StatusMessage
     {
-        public bool IsError { get; set; }
-        public Exception Error { get; set; }
+        public string Machine { get; set; }
+        public string Application { get; set; }
+        public string Process { get; set; }
         public string Message { get; set; }
-
-        public StatusMessage()
-        {
-
-        }
-
-        public StatusMessage(string message)
-        {
-            Message = message;
-        }
+        public string Warning { get; set; }
+        public string Error { get; set; }
     }
 }

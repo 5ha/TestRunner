@@ -29,14 +29,43 @@ namespace BuildManager
 
         public void OnNext(StatusMessage value)
         {
-            if (value.IsError)
+            StringBuilder s = new StringBuilder();
+            ComposePrefix(s, value);
+            OutputMessage(s, value);
+            OutputWarning(s, value);
+            OutputError(s, value);
+        }
+
+        private void OutputMessage(StringBuilder s, StatusMessage mess)
+        {
+            if (!String.IsNullOrEmpty(mess.Message))
             {
-                Console.WriteLine("Observer: ERROR: ", value.Error.Message);
-                Console.WriteLine(value.Error.StackTrace);
-            } else
-            {
-                Console.WriteLine($"Observer: {value.Message}");
+                Console.WriteLine($"{s.ToString()} : {mess.Message}");
             }
+        }
+
+        private void OutputWarning(StringBuilder s, StatusMessage mess)
+        {
+            if (!String.IsNullOrEmpty(mess.Warning))
+            {
+                Console.WriteLine($"{s.ToString()} WARNING: {mess.Warning}");
+            }
+        }
+
+        private void OutputError(StringBuilder s, StatusMessage mess)
+        {
+            if (!String.IsNullOrEmpty(mess.Error))
+            {
+                Console.WriteLine($"{s.ToString()} ERROR: {mess.Error}");
+            }
+        }
+
+        private void ComposePrefix(StringBuilder s, StatusMessage mess)
+        {
+            s.Append($"Observer:");
+            if (!string.IsNullOrEmpty(mess.Machine)) s.Append($"[{mess.Machine}]");
+            if (!string.IsNullOrEmpty(mess.Application)) s.Append($"[{mess.Application}]");
+            if (!string.IsNullOrEmpty(mess.Process)) s.Append($"[{mess.Process}]");
         }
     }
 }
