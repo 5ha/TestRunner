@@ -33,7 +33,7 @@ namespace ContainerManager
             // Subscribe to Build Messages
             IQueueBuilder queueBuilder = new RabbitBuilder();
             IReceiver receiver = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
-                .IReceiveFrom("build_queue")
+                .IReceiveFrom(QueueNames.Build())
                 .IReceiveForever()
                 .Build();
 
@@ -49,27 +49,32 @@ namespace ContainerManager
 
         public static void RunBuild(RunBuild build)
         {
+            IQueueBuilder queueBuilder = new RabbitBuilder();
+            ISender statusMessageSender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+                .ISendTo(QueueNames.Status(build.Build))
+                .Build();
+
             List<Task> tasks = new List<Task>();
 
-            Console.WriteLine($"Running {build.Build}");
+            statusMessageSender.Send(new StatusMessage($"Starting build {build.Build}"));
+            // TODO: log this as well somewhere
 
-            foreach(var proc in processes)
+            foreach (var proc in processes)
             {
                 tasks.Add(proc.RunBuild(build));
             }
 
-            Console.WriteLine("Waiting for tasks");
-
+            // Wait for at least one task to complete this build before moving onto the next build
             Task.WaitAny(tasks.ToArray());
 
             Console.WriteLine("A task has completed");
 
-            foreach (var proc in processes)
-            {
-                proc.RunBuild(build);
-            }
+            //foreach (var proc in processes)
+            //{
+            //    proc.RunBuild(build);
+            //}
 
-            Console.WriteLine("All completed ...removing build");
+            statusMessageSender.Send(new StatusMessage($"Build in progress {build.Build}"));
         }
 
     }

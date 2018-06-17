@@ -42,8 +42,12 @@ namespace BuildManager
 
         private static async Task KickOffBuild(string build)
         {
+            ToConsoleObserver observer = new ToConsoleObserver();
             using (var processor = new BuildProcessor("my-rabbit", "remote", "remote", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest", "shawnseabrook", "myimage", build))
             {
+                processor.SubscribeTestResult(observer);
+                processor.SubscribeStatusMessage(observer);
+
                 await processor.StartBuild(build);
             }
         }

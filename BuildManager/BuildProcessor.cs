@@ -23,7 +23,8 @@ namespace BuildManager
         private readonly string _repository;
         private readonly string _image;
         private readonly string _build;
-        private TestResultMonitor _monitor;
+        private TestResultMonitor _testResultMonitor;
+        private StatusMessageMonitor _statusMessageMonitor;
         private Dictionary<string,string> _expectedTests;
         private bool _allReceived = false;
 
@@ -32,11 +33,16 @@ namespace BuildManager
         ISender testInstructionSender;
         ISender buildInstructionSender;
         IReceiver testResultReceiver;
+        IReceiver statusMessageReceiver;
+
+        NunitParser _parser;
 
 
         public BuildProcessor(string host, string username, string password, string pathToBuildFolder, string testSearchDirectory, string repository, string image, string build)
         {
-            _monitor = new TestResultMonitor();
+            _testResultMonitor = new TestResultMonitor();
+            _statusMessageMonitor = new StatusMessageMonitor();
+
             _host = host;
             _username = username;
             _password = password;
@@ -47,6 +53,8 @@ namespace BuildManager
             _build = build;
             _cancellationTokenSource = new CancellationTokenSource();
             _expectedTests = new Dictionary<string, string>();
+
+            _parser = new NunitParser();
         }
 
         public async Task StartBuild(string build)
@@ -71,28 +79,31 @@ namespace BuildManager
                 
             AddTestsToDictionary(_expectedTests, tests);
 
+            // Configure receivers
+            statusMessageReceiver = ConfigureReceiver(QueueNames.Status(build));
+            testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(build));
+
             // Add all the tests to the queue
             Console.WriteLine($"[{build}] Sending Test Instructions ...");
-            testInstructionSender = ConfigureSender($"{build}_request");
+            testInstructionSender = ConfigureSender(QueueNames.TestRequest(build));
             SendTestInstructions(testInstructionSender, tests);
             Console.WriteLine($"[{build}] Test Instructions sent.");
 
             // Add the build instruction to the queue
             Console.WriteLine($"[{build}] Sending Build Instruction ...");
-            buildInstructionSender = ConfigureSender("build_queue");
+            buildInstructionSender = ConfigureSender(QueueNames.Build());
             buildInstructionSender.Send(CreateBuildInstruction(build));
             Console.WriteLine($"[{build}] Build Instruction sent.");
 
-
-            testResultReceiver = ConfigureReceiver($"{build}_response");
-
             // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
             testResultReceiver.Receive<TestResult>(TestResultReceived);
+            statusMessageReceiver.Receive<StatusMessage>(StatusMessageReceived);
 
             // Wait for tests to complete
             await TestsStillRunning(_cancellationTokenSource.Token);
 
-            // Flag the build as completed notifying subscribers
+            // Notify cubscribers that the run is complete
+            _testResultMonitor.notifyComplete();
 
             Console.WriteLine($"[{build}] All complete.");
         }
@@ -108,24 +119,35 @@ namespace BuildManager
             });
         }
 
+        private void StatusMessageReceived(StatusMessage message)
+        {
+            if (message.IsError)
+            {
+                _statusMessageMonitor.notifyError(message.Error);
+            } else
+            {
+                _statusMessageMonitor.notifyNext(message);
+            }
+        }
+
         private void TestResultReceived(TestResult result)
         {
-            // Add the result to the database
+            // TODO: Add the result to the database
+
+            TestExecutionResult testExecutionResult = _parser.Parse(result);
+
+            // Notify subscribers of the result
+            _testResultMonitor.notifyNext(testExecutionResult);
 
             if (_expectedTests.ContainsKey(result.FullName))
             {
                 _expectedTests.Remove(result.FullName);
             }
 
-
-            // Notify subscribers
-
             // Check if all results have been received
             if (_expectedTests.Count == 0)
             {
                 _allReceived = true; // this should be the only thread writing to that value
-
-                
             }
         }
 
@@ -168,7 +190,7 @@ namespace BuildManager
         {
             List<string> commands = new List<string>
             {
-                "TestRunner", "my-rabbit", "remote", "remote", $"{build}_request", $"{build}_response", "c:\\app"
+                "TestRunner", "my-rabbit", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
             };
 
             string containerImage = string.Format("{0}/{1}:{2}", _repository, _image, build);
@@ -176,9 +198,14 @@ namespace BuildManager
             return new RunBuild { Build = build, Commands = commands, ContainerImage = containerImage };
         }
 
-        public IDisposable Subscribe(IObserver<TestExecutionResult> observer)
+        public IDisposable SubscribeTestResult(IObserver<TestExecutionResult> observer)
         {
-            return _monitor.Subscribe(observer);
+            return _testResultMonitor.Subscribe(observer);
+        }
+
+        public IDisposable SubscribeStatusMessage(IObserver<StatusMessage> observer)
+        {
+            return _statusMessageMonitor.Subscribe(observer);
         }
 
         public void Dispose()

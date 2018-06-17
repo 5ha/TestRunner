@@ -1,4 +1,4 @@
-﻿using BuildManager.Model;
+﻿using MessageModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildManager
 {
-    public class TestResultMonitor : BaseMonitor<TestExecutionResult>
+    public class StatusMessageMonitor : BaseMonitor<StatusMessage>
     {
     }
 }

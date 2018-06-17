@@ -72,10 +72,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseMonitor.cs" />
     <Compile Include="BuildProcessor.cs" />
+    <Compile Include="NunitParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatusMessageMonitor.cs" />
     <Compile Include="TestResultMonitor.cs" />
+    <Compile Include="ToConsoleObserver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
