@@ -59,57 +59,63 @@ namespace BuildManager
 
         public async Task StartBuild(string build)
         {
-            // TODO: What if current build already exists
-
-            ReportStatus($"[{build}] Staring");
-
-            // Create the docker image and add it to the repository
-            var containerHelper = new ContainerHelper();
-            var imageBuildResult = await containerHelper.BuildImage(_pathToBuildFolder, _repository, _image, _build);
-
-            ReportStatus("[{build}] Image Build Result: ");
-            ReportStatus(imageBuildResult);
-            // TODO: Add to image repository
-
-            // Add the build to the database
-
-            // Add all the tests to the database
-            List<RunTest> tests;
-            using (TestExplorer testExplorer = new TestExplorer())
+            try
             {
-                tests = testExplorer.GetTests(build, _testSearchDirectory);
+                // TODO: What if current build already exists
+
+                ReportStatus($"[{build}] Staring");
+
+                // Create the docker image and add it to the repository
+                var containerHelper = new ContainerHelper();
+                var imageBuildResult = await containerHelper.BuildImage(_pathToBuildFolder, _repository, _image, _build);
+
+                ReportStatus("[{build}] Image Build Result: ");
+                ReportStatus(imageBuildResult);
+                // TODO: Add to image repository
+
+                // Add the build to the database
+
+                // Add all the tests to the database
+                List<RunTest> tests;
+                using (TestExplorer testExplorer = new TestExplorer())
+                {
+                    tests = testExplorer.GetTests(build, _testSearchDirectory);
+                }
+
+                AddTestsToDictionary(_expectedTests, tests);
+
+                // Configure receivers
+                statusMessageReceiver = ConfigureReceiver(QueueNames.Status(build));
+                testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(build));
+
+                // Add all the tests to the queue
+                ReportStatus($"[{build}] Sending Test Instructions ...");
+                testInstructionSender = ConfigureSender(QueueNames.TestRequest(build));
+                SendTestInstructions(testInstructionSender, tests);
+                ReportStatus($"[{build}] Test Instructions sent.");
+
+                // Add the build instruction to the queue
+                ReportStatus($"[{build}] Sending Build Instruction ...");
+                buildInstructionSender = ConfigureSender(QueueNames.Build());
+                buildInstructionSender.Send(CreateBuildInstruction(build));
+                ReportStatus($"[{build}] Build Instruction sent.");
+
+                // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
+                testResultReceiver.Receive<TestResult>(TestResultReceived);
+                statusMessageReceiver.Receive<StatusMessage>(StatusMessageReceived);
+
+                // Wait for tests to complete
+                await TestsStillRunning(_cancellationTokenSource.Token);
+
+                // Notify cubscribers that the run is complete
+                _testResultMonitor.notifyComplete();
+
+                ReportStatus($"[{build}] All complete.");
+                _statusMessageMonitor.notifyComplete();
+            } catch (Exception ex)
+            {
+                ReportError(ex.Message);
             }
-
-            AddTestsToDictionary(_expectedTests, tests);
-
-            // Configure receivers
-            statusMessageReceiver = ConfigureReceiver(QueueNames.Status(build));
-            testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(build));
-
-            // Add all the tests to the queue
-            ReportStatus($"[{build}] Sending Test Instructions ...");
-            testInstructionSender = ConfigureSender(QueueNames.TestRequest(build));
-            SendTestInstructions(testInstructionSender, tests);
-            ReportStatus($"[{build}] Test Instructions sent.");
-
-            // Add the build instruction to the queue
-            ReportStatus($"[{build}] Sending Build Instruction ...");
-            buildInstructionSender = ConfigureSender(QueueNames.Build());
-            buildInstructionSender.Send(CreateBuildInstruction(build));
-            ReportStatus($"[{build}] Build Instruction sent.");
-
-            // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
-            testResultReceiver.Receive<TestResult>(TestResultReceived);
-            statusMessageReceiver.Receive<StatusMessage>(StatusMessageReceived);
-
-            // Wait for tests to complete
-            await TestsStillRunning(_cancellationTokenSource.Token);
-
-            // Notify cubscribers that the run is complete
-            _testResultMonitor.notifyComplete();
-
-            ReportStatus($"[{build}] All complete.");
-            _statusMessageMonitor.notifyComplete();
         }
 
         private Task TestsStillRunning(CancellationToken cancellationToken)

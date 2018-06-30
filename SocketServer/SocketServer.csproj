@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{44EDA651-93D9-4DC2-850C-094C089CC5D0}</ProjectGuid>
+    <ProjectGuid>{F5A9BF8B-A847-44EA-96DE-4DB4BD19F3EB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>BuildManager</RootNamespace>
-    <AssemblyName>BuildManager</AssemblyName>
+    <RootNamespace>SocketServer</RootNamespace>
+    <AssemblyName>SocketServer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -21,7 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Docker.DotNet, Version=3.125.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Docker.DotNet.3.125.2\lib\net46\Docker.DotNet.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.Engine.3.8.0\lib\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -52,17 +48,25 @@
       <HintPath>..\packages\NUnit.Engine.3.8.0\lib\nunit.engine.dll</HintPath>
     </Reference>
     <Reference Include="nunit.engine.api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.Engine.3.8.0\lib\nunit.engine.api.dll</HintPath>
+      <HintPath>..\packages\NUnit.Engine.Api.3.8.0\lib\nunit.engine.api.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveSockets, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveSockets.0.2.6\lib\net40\ReactiveSockets.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.3.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -72,40 +76,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseMonitor.cs" />
-    <Compile Include="BuildController.cs" />
-    <Compile Include="BuildProcessor.cs" />
-    <Compile Include="NunitParser.cs" />
+    <Compile Include="BuildRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StatusMessageMonitor.cs" />
-    <Compile Include="TestResultMonitor.cs" />
-    <Compile Include="ToConsoleObserver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DockerUtils\DockerUtils.csproj">
-      <Project>{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}</Project>
-      <Name>DockerUtils</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HiQ\HiQ.csproj">
-      <Project>{886e8f1b-8d34-4612-a459-2659b392a910}</Project>
-      <Name>HiQ</Name>
+    <ProjectReference Include="..\BuildManager\BuildManager.csproj">
+      <Project>{44eda651-93d9-4dc2-850c-094c089cc5d0}</Project>
+      <Name>BuildManager</Name>
     </ProjectReference>
     <ProjectReference Include="..\MessageModels\MessageModels.csproj">
-      <Project>{2515EBDF-3275-4934-85A1-CB7BFC166DD4}</Project>
+      <Project>{2515ebdf-3275-4934-85a1-cb7bfc166dd4}</Project>
       <Name>MessageModels</Name>
     </ProjectReference>
     <ProjectReference Include="..\Model\Model.csproj">
-      <Project>{fe06e298-5167-4bbd-a7df-0838076594a1}</Project>
+      <Project>{FE06E298-5167-4BBD-A7DF-0838076594A1}</Project>
       <Name>Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NUnitUtils\NUnitUtils.csproj">
-      <Project>{641094c3-707c-4803-85d9-f7c80be51232}</Project>
-      <Name>NUnitUtils</Name>
+    <ProjectReference Include="..\SocketProtocol\SocketProtocol.csproj">
+      <Project>{6f03b80c-19ed-4133-b5ff-026273cb646a}</Project>
+      <Name>SocketProtocol</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
