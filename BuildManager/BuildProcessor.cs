@@ -107,10 +107,10 @@ namespace BuildManager
                 // Wait for tests to complete
                 await TestsStillRunning(_cancellationTokenSource.Token);
 
+                ReportStatus($"DONE");
+
                 // Notify cubscribers that the run is complete
                 _testResultMonitor.notifyComplete();
-
-                ReportStatus($"[{build}] All complete.");
                 _statusMessageMonitor.notifyComplete();
             } catch (Exception ex)
             {
@@ -131,8 +131,10 @@ namespace BuildManager
         }
 
         private void StatusMessageReceived(StatusMessage message)
-        { 
+        {
+            Console.WriteLine($"{ message.Error}{message.Warning}{message.Message}");
             _statusMessageMonitor.notifyNext(message);
+
 
             // if there is an error in the message stop everything because we have no guarantee
             // that we will get all test results back
@@ -145,6 +147,8 @@ namespace BuildManager
         private void TestResultReceived(TestResult result)
         {
             // TODO: Add the result to the database
+
+            Console.WriteLine($"TEST RESULT : {result.FullName}");
 
             TestExecutionResult testExecutionResult = _parser.Parse(result);
 
@@ -202,7 +206,7 @@ namespace BuildManager
         {
             List<string> commands = new List<string>
             {
-                "TestRunner", "172.21.190.84", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
+                "TestRunner", "172.21.181.3", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
             };
 
             string containerImage = string.Format("{0}/{1}:{2}", _repository, _image, build);

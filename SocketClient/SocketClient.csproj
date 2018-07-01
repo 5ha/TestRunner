@@ -69,6 +69,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MessageModels\MessageModels.csproj">
+      <Project>{2515ebdf-3275-4934-85a1-cb7bfc166dd4}</Project>
+      <Name>MessageModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{fe06e298-5167-4bbd-a7df-0838076594a1}</Project>
+      <Name>Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SocketProtocol\SocketProtocol.csproj">
       <Project>{6f03b80c-19ed-4133-b5ff-026273cb646a}</Project>
       <Name>SocketProtocol</Name>

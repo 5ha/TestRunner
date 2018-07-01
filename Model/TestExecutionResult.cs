@@ -10,6 +10,11 @@ namespace BuildManager.Model
         public DateTime DateUtc { get; set; }
         public string FullName { get; set; }
         public bool Passed { get; set; }
-        public string ResultData { get; set; }
+        //public string ResultData { get; set; }
+
+        public override string ToString()
+        {
+            return $"TEST RESULT: {FullName}";
+        }
     }
 }

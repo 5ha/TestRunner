@@ -24,7 +24,8 @@ namespace SocketServer
         }
         public void OnCompleted()
         {
-            _protocol.SendAsync("ALL COMPLETE");
+            Console.WriteLine("DONE");
+            _protocol.SendAsync("DONE");
         }
 
         public void OnError(Exception error)
@@ -34,16 +35,19 @@ namespace SocketServer
                 Error = error.Message
             };
 
+            Console.WriteLine(mess.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(mess, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
         }
 
         public void OnNext(TestExecutionResult value)
-        { 
+        {
+            Console.WriteLine(value.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(value,new JsonSerializerSettings {  TypeNameHandling = TypeNameHandling.All}));
         }
 
         public void OnNext(StatusMessage value)
         {
+            Console.WriteLine(value.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(value, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
         }
 
@@ -53,5 +57,7 @@ namespace SocketServer
 
             return buildController.KickOffBuild(_build, this);
         }
+
+        
     }
 }

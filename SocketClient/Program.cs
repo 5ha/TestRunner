@@ -1,4 +1,7 @@
-﻿using ReactiveSockets;
+﻿using BuildManager.Model;
+using MessageModels;
+using Newtonsoft.Json;
+using ReactiveSockets;
 using SocketProtocol;
 using System;
 using System.Collections.Generic;
@@ -17,46 +20,134 @@ namespace SocketClient
             try
             {
                 if (args.Length == 0)
-                    throw new ArgumentException("Usage: reactiveclient host [port]");
+                    throw new ArgumentException("Usage: reactiveclient host build");
 
                 var host = args[0];
+
                 var port = 1055;
 
-                if (args.Length > 1)
-                    port = int.Parse(args[1]);
+                var build = args[1];
+
+                //if (args.Length > 1)
+                //    port = int.Parse(args[1]);
 
                 var client = new ReactiveClient(host, port);
                 var protocol = new StringChannel(client);
 
                 protocol.Receiver.SubscribeOn(TaskPoolScheduler.Default).Subscribe(
-                    s => Console.WriteLine(s),
-                    e => Console.WriteLine(e),
-                    () => Console.WriteLine("Socket receiver completed"));
+                    s => {
+
+                        try {
+
+                            var obj = JsonConvert.DeserializeObject(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+
+                            StatusMessage statusMessage = obj as StatusMessage;
+                            TestExecutionResult testResult = obj as TestExecutionResult;
+
+
+                            if (testResult != null)
+                            {
+                                OutputTestMessage(testResult);
+                            }
+
+                            if (statusMessage != null)
+                            {
+                                if (statusMessage.Message == "DONE")
+                                {
+                                    client.Disconnect();
+                                    Environment.Exit(0);
+                                }
+                                OutputStatusMessage(statusMessage.Message);
+                            } else
+                            {
+                                OutputStatusMessage(obj.GetType().FullName);
+                            }
+
+                        }catch(Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                        } ,
+                    e => OutputStatusMessage(e.Message),
+                    () => OutputStatusMessage("Socket receiver completed"));
 
                 client.ConnectAsync().Wait();
 
-                string line = null;
+                protocol.SendAsync(build);
+                OutputStatusMessage($"Request build {build}");
 
-                while ((line = Console.ReadLine()) != "")
-                {
-                    if (line == "r")
-                    {
-                        Console.WriteLine("Reconnecting...");
-                        client.Disconnect();
-                        client.ConnectAsync().Wait();
-                        Console.WriteLine("IsConnected = {0}", client.IsConnected);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Sending");
-                        protocol.SendAsync(line);
-                    }
-                }
+                System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
+                //string line;
+                //while ((line = Console.ReadLine()) != "") { }
+
+                //while (client.IsConnected)
+                //{
+                //    Task.Delay(1000).Wait();
+                //}
+
+                //string line = null;
+
+                //while ((line = Console.ReadLine()) != "")
+                //{
+                //    if (line == "r")
+                //    {
+                //        OutputStatusMessage("Reconnecting...");
+                //        client.Disconnect();
+                //        client.ConnectAsync().Wait();
+                //        Console.WriteLine("IsConnected = {0}", client.IsConnected);
+                //    }
+                //    else
+                //    {
+                //        OutputStatusMessage("Sending");
+
+                //    }
+                //}
             }
             catch (Exception e)
             {
                 Console.WriteLine("Failed: {0}", e);
             }
         }
+
+        private static string Escape(string s)
+        {
+            if (s == null) return null;
+
+            s = s.Replace("|", "||");
+            s = s.Replace("'", "|'");
+            s = s.Replace("\n", "|n");
+            s = s.Replace("\r", "|r");
+            s = s.Replace("[", "|[");
+            s = s.Replace("]", "|]");
+
+            return s;
+        }
+
+        private static void OutputStatusMessage(string s)
+        {
+            Console.WriteLine($"##teamcity[message text='{Escape(s)}']");
+        }
+
+        private static void OutputTestMessage(TestExecutionResult result)
+        {
+            Console.WriteLine($"##teamcity[testStarted name='{Escape(result.FullName)}']");
+            Console.WriteLine($"##teamcity[testFinished name='{Escape(result.FullName)}']");
+        }
+
+        /**
+         * echo ##teamcity[message text='compiler output']
+echo ##teamcity[message text='compiler error' status='ERROR']
+
+echo ##teamcity[testStarted name='MyTest.test2']
+echo ##teamcity[testFailed type='comparisonFailure' name='MyTest.test2' message='failure message' details='message and stack trace' expected='expected value' actual='actual value']
+echo ##teamcity[testFinished name='MyTest.test2']
+
+echo ##teamcity[testStarted name='MyTest.test3']
+echo ##teamcity[testFinished name='MyTest.test3']
+         * **/
     }
+
+    //C:\Users\shawn\source\repos\TestNUnitRunner\SocketClient\bin\Debug\SocketClient.exe 127.0.0.1 37
+
+
 }
