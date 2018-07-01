@@ -43,6 +43,20 @@ namespace ContainerManager
                         {
                             Action<(string status, string warning, string error)> notify = ((string status, string warning, string error) state) =>
                             {
+                                if (!string.IsNullOrEmpty(state.status))
+                                {
+                                    Console.WriteLine($"INFO: {state.status}");
+                                }
+
+                                if (!string.IsNullOrEmpty(state.warning))
+                                {
+                                    Console.WriteLine($"WARNING: {state.warning}");
+                                }
+
+                                if (!string.IsNullOrEmpty(state.error))
+                                {
+                                    Console.WriteLine($"ERROR: {state.error}");
+                                }
                                 statusMessageSender.Send(StatusReport(state));
                             };
 
@@ -135,8 +149,6 @@ namespace ContainerManager
 
                 (stdOut, stdErr) = await helper.AwaitContainer(createContainerResponse.ID);
 
-                notify(($"Container {createContainerResponse.ID} completed", null, null));
-
                 if (!string.IsNullOrEmpty(stdOut))
                 {
                     notify((stdOut, null, null));
@@ -146,6 +158,10 @@ namespace ContainerManager
                 {
                     notify((null, null, stdErr));
                 }
+
+                notify(($"Container {createContainerResponse.ID} completed", null, null));
+
+
             }
             catch (Exception ex)
             {

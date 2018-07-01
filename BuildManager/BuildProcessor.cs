@@ -202,7 +202,7 @@ namespace BuildManager
         {
             List<string> commands = new List<string>
             {
-                "TestRunner", "my-rabbit", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
+                "TestRunner", "172.21.190.84", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
             };
 
             string containerImage = string.Format("{0}/{1}:{2}", _repository, _image, build);

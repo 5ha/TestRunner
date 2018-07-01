@@ -93,6 +93,8 @@ namespace DockerUtils
 
         public async Task<(string stdOut, string stdErr)> AwaitContainer(string id)
         {
+            try
+            {
                 var config = new ContainerAttachParameters
                 {
                     Stream = true,
@@ -110,6 +112,10 @@ namespace DockerUtils
                 }
 
                 return containerResult;
+            } catch (Exception ex)
+            {
+                return ("", ex.Message);
+            }
         }
 
         public Task RemoveContainer(string id)
