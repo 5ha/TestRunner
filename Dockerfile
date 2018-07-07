@@ -1,3 +1,3 @@
 ﻿FROM microsoft/dotnet-framework
 WORKDIR /tester
-COPY InContainer/Publish .
+COPY Publish .
