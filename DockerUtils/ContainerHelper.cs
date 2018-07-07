@@ -91,6 +91,27 @@ namespace DockerUtils
 
         }
 
+        public async Task<string> AttachContainer(string id)
+        {
+            var config = new ContainerAttachParameters
+            {
+                Stream = true,
+                Stderr = true,
+                Stdin = false,
+                Stdout = true,
+            };
+
+            string stdOut;
+            string stdErr;
+            var buffer = new byte[1024];
+            using (var stream = await _client.Containers.AttachContainerAsync(id, false, config, default(CancellationToken)))
+            {
+                (stdOut, stdErr) = await stream.ReadOutputToEndAsync(default(CancellationToken));
+            }
+
+            return stdOut;
+        }
+
         public async Task<(string stdOut, string stdErr)> AwaitContainer(string id)
         {
             try

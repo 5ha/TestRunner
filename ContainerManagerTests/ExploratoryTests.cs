@@ -1,4 +1,5 @@
 ﻿using ContainerManager;
+using Docker.DotNet.Models;
 using DockerUtils;
 using NUnit.Framework;
 using System;
@@ -36,6 +37,20 @@ namespace ContainerManagerTests
             Action<string> write = (s) => Console.WriteLine(s);
 
             await sut.PullImage(@"shawnseabrook/build:20", write, write, write);
+        }
+
+        [Test]
+        public async Task CanAttachContainer()
+        {
+            var sut = new ContainerHelper();
+
+            CreateContainerResponse createContainerResponse = await sut.CreateContainer(@"shawnseabrook/build:50", "canattach", new List<string> { "ListTests" });
+
+            await sut.StartContainer(createContainerResponse.ID);
+
+            string res = await sut.AttachContainer(createContainerResponse.ID);
+
+            Console.WriteLine(res);
         }
     }
 }

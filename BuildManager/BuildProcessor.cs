@@ -1,4 +1,5 @@
 ﻿using BuildManager.Model;
+using Docker.DotNet.Models;
 using DockerUtils;
 using HiQ.Builders;
 using HiQ.Interfaces;
@@ -75,6 +76,21 @@ namespace BuildManager
 
                 // Get the tests from the docker image
 
+                CreateContainerResponse createContainerResponse = await containerHelper.CreateContainer(request.Image, request.Build, new List<string> { "ListTests" });
+
+                await containerHelper.StartContainer(createContainerResponse.ID);
+
+                string testOutput = await containerHelper.AttachContainer(createContainerResponse.ID);
+                string[] testNames = testOutput.Split('\n');
+
+                foreach(string testName in testNames)
+                {
+                    RunTest item = new RunTest
+                    {
+                        Build = request.Build,
+                        FullName = testName
+                    };
+                }
 
                 AddTestsToDictionary(_expectedTests, tests);
 
@@ -91,7 +107,7 @@ namespace BuildManager
                 // Add the build instruction to the queue
                 ReportStatus($"[{request.Build}] Sending Build Instruction ...");
                 buildInstructionSender = ConfigureSender(QueueNames.Build());
-                buildInstructionSender.Send(CreateBuildInstruction(request.Build));
+                buildInstructionSender.Send(CreateBuildInstruction(request));
                 ReportStatus($"[{request.Build}] Build Instruction sent.");
 
                 // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
@@ -196,16 +212,16 @@ namespace BuildManager
             return receiver;
         }
 
-        private RunBuild CreateBuildInstruction(string build)
+        private RunBuild CreateBuildInstruction(BuildRunRequest request)
         {
             List<string> commands = new List<string>
             {
-                "TestRunner", "172.21.181.3", "remote", "remote", QueueNames.TestRequest(build), QueueNames.TestResponse(build), "c:\\app"
+                "RunTests", 
+                QueueNames.TestRequest(request.Build),
+                QueueNames.TestResponse(request.Build)
             };
 
-            string containerImage = string.Format("{0}/{1}:{2}", _repository, _image, build);
-
-            return new RunBuild { Build = build, Commands = commands, ContainerImage = containerImage };
+            return new RunBuild { Build = request.Build, Commands = commands, ContainerImage = request.Image };
         }
 
         public IDisposable SubscribeTestResult(IObserver<TestExecutionResult> observer)

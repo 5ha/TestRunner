@@ -1,5 +1,6 @@
 ﻿using BuildManager.Model;
 using MessageModels;
+using Model;
 using Newtonsoft.Json;
 using ReactiveSockets;
 using SocketProtocol;
@@ -27,6 +28,7 @@ namespace SocketClient
                 var port = 1055;
 
                 var build = args[1];
+                var image = args[2];
 
                 //if (args.Length > 1)
                 //    port = int.Parse(args[1]);
@@ -35,9 +37,11 @@ namespace SocketClient
                 var protocol = new StringChannel(client);
 
                 protocol.Receiver.SubscribeOn(TaskPoolScheduler.Default).Subscribe(
-                    s => {
+                    s =>
+                    {
 
-                        try {
+                        try
+                        {
 
                             var obj = JsonConvert.DeserializeObject(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
@@ -58,22 +62,32 @@ namespace SocketClient
                                     Environment.Exit(0);
                                 }
                                 OutputStatusMessage(statusMessage.Message);
-                            } else
+                            }
+                            else
                             {
                                 OutputStatusMessage(obj.GetType().FullName);
                             }
 
-                        }catch(Exception ex)
+                        }
+                        catch (Exception ex)
                         {
                             Console.WriteLine(ex.Message);
                         }
-                        } ,
+                    },
                     e => OutputStatusMessage(e.Message),
                     () => OutputStatusMessage("Socket receiver completed"));
 
                 client.ConnectAsync().Wait();
 
-                protocol.SendAsync(build);
+                BuildRunRequest request = new BuildRunRequest
+                {
+                    Build = build,
+                    Image = image
+                };
+
+                string mess = JsonConvert.SerializeObject(request);
+
+                protocol.SendAsync(mess);
                 OutputStatusMessage($"Request build {build}");
 
                 System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
