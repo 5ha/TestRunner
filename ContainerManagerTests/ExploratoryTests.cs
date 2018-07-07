@@ -25,7 +25,17 @@ namespace ContainerManagerTests
         {
             var sut = new ContainerHelper();
 
-            await sut.PublishImage(@"shawnseabrook\myimage:v5");
+            await sut.PublishImage(@"shawnseabrook\myimage:v5",null,null,null);
+        }
+
+        [Test]
+        public async Task CanPullImage()
+        {
+            var sut = new ContainerHelper();
+
+            Action<string> write = (s) => Console.WriteLine(s);
+
+            await sut.PullImage(@"shawnseabrook/build:20", write, write, write);
         }
     }
 }

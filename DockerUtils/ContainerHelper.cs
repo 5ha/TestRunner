@@ -154,8 +154,13 @@ namespace DockerUtils
             }
         }
 
+        public async Task PullImage(string image, Action<string> onStatus, Action<string> onError, Action<string> onProgress)
+        {
+            await _client.Images.CreateImageAsync(new ImagesCreateParameters()
+            { FromImage = image }, null, new ProgressMonitor(onStatus, onError, onProgress));
+        }
 
-        public async Task PublishImage(string image)
+        public async Task PublishImage(string image, Action<string> onStatus, Action<string> onError, Action<string> onProgress)
         {
             var authConfig = new AuthConfig()
             {
@@ -168,7 +173,8 @@ namespace DockerUtils
 
             };
 
-            await _client.Images.PushImageAsync(image, parameters, authConfig, new ProgressMonitor());
+            // TODO: send progress results
+            await _client.Images.PushImageAsync(image, parameters, authConfig, new ProgressMonitor(onStatus, onError, onProgress));
         }
 
         public void Dispose()
@@ -180,10 +186,30 @@ namespace DockerUtils
 
         private class ProgressMonitor : IProgress<JSONMessage>
         {
+            private readonly Action<string> _onStatus;
+            private readonly Action<string> _onError;
+            private readonly Action<string> _onProgress;
+
+            public ProgressMonitor(Action<string> onStatus, Action<string> onError, Action<string> onProgress)
+            {
+                _onStatus = onStatus;
+                _onError = onError;
+                _onProgress = onProgress;
+            }
             public void Report(JSONMessage value)
             {
-                var x = value.ProgressMessage;
-                //throw new NotImplementedException();
+                if (_onStatus != null && !string.IsNullOrEmpty(value.Status))
+                {
+                    _onStatus(value.Status);
+                }
+                if (_onError != null && !string.IsNullOrEmpty(value.ErrorMessage))
+                {
+                    _onError(value.ErrorMessage);
+                }
+                if (_onProgress != null && !string.IsNullOrEmpty(value.ProgressMessage))
+                {
+                    _onProgress(value.ProgressMessage);
+                }
             }
         }
     }

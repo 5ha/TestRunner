@@ -3,7 +3,6 @@ using DockerUtils;
 using HiQ.Builders;
 using HiQ.Interfaces;
 using MessageModels;
-using NUnitUtils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,16 +70,13 @@ namespace BuildManager
 
                 ReportStatus("[{build}] Image Build Result: ");
                 ReportStatus(imageBuildResult);
-                // TODO: Add to image repository
 
-                // Add the build to the database
+                // Download
 
-                // Add all the tests to the database
-                List<RunTest> tests;
-                using (TestExplorer testExplorer = new TestExplorer())
-                {
-                    tests = testExplorer.GetTests(build, _testSearchDirectory);
-                }
+                List<RunTest> tests = new List<RunTest>();
+
+                // Get the tests from the docker image
+
 
                 AddTestsToDictionary(_expectedTests, tests);
 
