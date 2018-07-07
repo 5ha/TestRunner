@@ -88,8 +88,10 @@ namespace BuildManager
                     RunTest item = new RunTest
                     {
                         Build = request.Build,
-                        FullName = testName
+                        FullName = testName.Trim()
                     };
+
+                    tests.Add(item);
                 }
 
                 AddTestsToDictionary(_expectedTests, tests);
