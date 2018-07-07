@@ -11,7 +11,7 @@ namespace InContainerShared
     {
         public void OnTestEvent(string report)
         {
-            //Console.WriteLine
+            Console.WriteLine(report);
         }
     }
 }

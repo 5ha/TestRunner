@@ -48,6 +48,7 @@
       <HintPath>..\packages\NUnit.Engine.Api.3.8.0\lib\nunit.engine.api.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -63,6 +64,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InContainerShared\InContainerShared.csproj">
+      <Project>{EBB4C23C-FFB2-4C01-965B-74402F56C6CF}</Project>
+      <Name>InContainerShared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -83,8 +83,14 @@ namespace InContainerShared
         {
             var filterBuilder = _filterService.GetTestFilterBuilder();
             filterBuilder.AddTest(instruction.FullName);
-            var res = _runner.Run(new Listener(), filterBuilder.GetFilter());
+            var res = _runner.Run(null, filterBuilder.GetFilter());
             return res;
+        }
+
+        public void ExecuteAll()
+        {
+            var filterBuilder = _filterService.GetTestFilterBuilder();
+            _runner.Run(new Listener(), filterBuilder.GetFilter());
         }
     }
 }
