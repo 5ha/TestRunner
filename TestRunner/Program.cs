@@ -9,6 +9,7 @@ using System.Xml;
 using System.IO;
 using HiQ.Interfaces;
 using HiQ.Builders;
+using System.Configuration;
 
 namespace TestRunner
 {
@@ -20,12 +21,13 @@ namespace TestRunner
         static void Main(string[] args)
         {
             string instanceName = Environment.GetEnvironmentVariable("instance");
-            string queueServer = args[0];
-            string queueUsername = args[1];
-            string queuePassword = args[2];
-            string requestQueueName = args[3];
-            string responseQueueName = args[4];
-            string directoryToSearch = args[5];
+            string requestQueueName = args[0];
+            string responseQueueName = args[1];
+
+            string queueServer = ConfigurationManager.AppSettings["queueServer"];
+            string queueUsername = ConfigurationManager.AppSettings["queueUsername"];
+            string queuePassword = ConfigurationManager.AppSettings["queuePassword"];
+            string directoryToSearch = ConfigurationManager.AppSettings["directoryToSearch"];
 
             IQueueBuilder queueBuilder = new RabbitBuilder();
             receiver =
