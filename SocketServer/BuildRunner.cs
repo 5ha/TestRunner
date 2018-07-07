@@ -15,12 +15,12 @@ namespace SocketServer
     public class BuildRunner : ITestRunObserver
     {
         private readonly StringChannel _protocol;
-        private readonly string _build;
+        private readonly BuildRunRequest _request;
 
-        public BuildRunner(StringChannel protocol, string build)
+        public BuildRunner(StringChannel protocol, BuildRunRequest request)
         {
             this._protocol = protocol;
-            this._build = build;
+            this._request = request;
         }
         public void OnCompleted()
         {
@@ -55,7 +55,7 @@ namespace SocketServer
         {
             BuildController buildController = new BuildController();
 
-            return buildController.KickOffBuild(_build, this);
+            return buildController.KickOffBuild(_request, this);
         }
 
         

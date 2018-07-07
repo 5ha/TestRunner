@@ -1,4 +1,5 @@
-﻿using ReactiveSockets;
+﻿using Model;
+using ReactiveSockets;
 using SocketProtocol;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,9 @@ namespace SocketServer
                     s => {
                         Console.WriteLine(s);
 
-                        BuildRunner buildRunner = new BuildRunner(protocol, s);
+                        BuildRunRequest request = Newtonsoft.Json.JsonConvert.DeserializeObject<BuildRunRequest>(s);
+
+                        BuildRunner buildRunner = new BuildRunner(protocol, request);
                         buildRunner.StartBuild().Wait();
                     }
                     

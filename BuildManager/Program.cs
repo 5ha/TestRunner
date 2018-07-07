@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,24 +11,29 @@ namespace BuildManager
     {
         static async Task Main(string[] args)
         {
-            string build;
 
+            string input;
             try
             {
                 do
                 {
                     Console.WriteLine("Type in a build number and press enter to run the build");
                     Console.WriteLine("Press enter on it's own to quit");
-                    build = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(build))
+                    input = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(input))
                     {
+                        string[] ary = input.Split(' ');
+                        BuildRunRequest request = new BuildRunRequest {
+                            Build = ary[0],
+                            Image = ary[1]
+                        };
                         Console.WriteLine("Please wait ...");
                         BuildController controller = new BuildController();
-                        await controller.KickOffBuild(build);
+                        await controller.KickOffBuild(request);
                         Console.WriteLine("OK");
                         Console.WriteLine("===================================================");
                     }
-                } while (!string.IsNullOrEmpty(build));
+                } while (!string.IsNullOrEmpty(input));
 
             } catch(Exception ex)
             {

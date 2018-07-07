@@ -10,9 +10,11 @@ using System.IO;
 using HiQ.Interfaces;
 using HiQ.Builders;
 using System.Configuration;
+using InContainerShared;
 
 namespace TestRunner
 {
+
     class Program 
     {
         static ISender sender;
@@ -66,14 +68,6 @@ namespace TestRunner
             sender.Dispose();
             Console.WriteLine("Environment exiting.");
             Environment.Exit(0);
-        }
-    }
-
-    public class Listener : ITestEventListener
-    {
-        public void OnTestEvent(string report)
-        {
-            var x = report;
         }
     }
 }

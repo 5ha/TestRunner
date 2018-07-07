@@ -3,6 +3,7 @@ using DockerUtils;
 using HiQ.Builders;
 using HiQ.Interfaces;
 using MessageModels;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,22 +57,19 @@ namespace BuildManager
             _parser = new NunitParser();
         }
 
-        public async Task StartBuild(string build)
+        public async Task StartBuild(BuildRunRequest request)
         {
             try
             {
                 // TODO: What if current build already exists
 
-                ReportStatus($"[{build}] Staring");
+                ReportStatus($"[{request.Build}] Staring");
 
-                // Create the docker image and add it to the repository
+                
                 var containerHelper = new ContainerHelper();
-                var imageBuildResult = await containerHelper.BuildImage(_pathToBuildFolder, _repository, _image, _build);
 
-                ReportStatus("[{build}] Image Build Result: ");
-                ReportStatus(imageBuildResult);
-
-                // Download
+                // Pull the image
+                await containerHelper.PullImage(request.Image, ReportStatus, ReportError, ReportStatus);
 
                 List<RunTest> tests = new List<RunTest>();
 
@@ -81,20 +79,20 @@ namespace BuildManager
                 AddTestsToDictionary(_expectedTests, tests);
 
                 // Configure receivers
-                statusMessageReceiver = ConfigureReceiver(QueueNames.Status(build));
-                testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(build));
+                statusMessageReceiver = ConfigureReceiver(QueueNames.Status(request.Build));
+                testResultReceiver = ConfigureReceiver(QueueNames.TestResponse(request.Build));
 
                 // Add all the tests to the queue
-                ReportStatus($"[{build}] Sending Test Instructions ...");
-                testInstructionSender = ConfigureSender(QueueNames.TestRequest(build));
+                ReportStatus($"[{request.Build}] Sending Test Instructions ...");
+                testInstructionSender = ConfigureSender(QueueNames.TestRequest(request.Build));
                 SendTestInstructions(testInstructionSender, tests);
-                ReportStatus($"[{build}] Test Instructions sent.");
+                ReportStatus($"[{request.Build}] Test Instructions sent.");
 
                 // Add the build instruction to the queue
-                ReportStatus($"[{build}] Sending Build Instruction ...");
+                ReportStatus($"[{request.Build}] Sending Build Instruction ...");
                 buildInstructionSender = ConfigureSender(QueueNames.Build());
-                buildInstructionSender.Send(CreateBuildInstruction(build));
-                ReportStatus($"[{build}] Build Instruction sent.");
+                buildInstructionSender.Send(CreateBuildInstruction(request.Build));
+                ReportStatus($"[{request.Build}] Build Instruction sent.");
 
                 // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
                 testResultReceiver.Receive<TestResult>(TestResultReceived);
