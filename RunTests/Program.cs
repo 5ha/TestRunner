@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace TestRunner
 {
-
     class Program 
     {
         static ISender sender;
