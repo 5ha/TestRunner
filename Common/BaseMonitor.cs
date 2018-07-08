@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BuildManager
+namespace Common
 {
     public abstract class BaseMonitor<T> : IObservable<T> where T : class
     {
@@ -22,7 +19,7 @@ namespace BuildManager
             return new Unsubscriber<T>(_observers, observer);
         }
 
-        internal void notifyNext(T mess)
+        public void notifyNext(T mess)
         {
             foreach (var observer in _observers)
             {
@@ -30,7 +27,7 @@ namespace BuildManager
             }
         }
 
-        internal void notifyComplete()
+        public void notifyComplete()
         {
             foreach (var observer in _observers)
             {
@@ -38,7 +35,7 @@ namespace BuildManager
             }
         }
 
-        internal void notifyError(Exception err)
+        public void notifyError(Exception err)
         {
             foreach (var observer in _observers)
             {

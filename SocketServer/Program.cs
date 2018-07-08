@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using log4net.Config;
+using Model;
 using ReactiveSockets;
 using SocketProtocol;
 using System;
@@ -13,6 +14,7 @@ namespace SocketServer
     {
         static void Main(string[] args)
         {
+            XmlConfigurator.Configure();
 
             var port = 1055;
             if (args.Length > 0)

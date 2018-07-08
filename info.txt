@@ -1,0 +1,17 @@
+
+
+docker run -d --hostname my-rabbit --network my-net --name some-rabbit micdenny/rabbitmq-windows
+
+Run Socket Client:
+C:\Users\shawn\source\repos\TestNUnitRunner\SocketClient\bin\Debug\SocketClient.exe 127.0.0.1 56 shawnseabrook/build:56
+
+Build Message:
+{"ContainerImage":"shawnseabrook/build:56","Build":"56","Commands":["RunTests","56_request","56_response"]}
+
+Test Message:
+{"Build":"56","FullName":"SystemUnderTest.PassingTest"}
+
+RunTests
+docker container run -it shawnseabrook/build:56 RunTests 56_request 56_response
+
+

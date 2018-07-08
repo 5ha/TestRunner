@@ -36,6 +36,9 @@
     <Reference Include="Docker.DotNet, Version=3.125.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Docker.DotNet.3.125.2\lib\net46\Docker.DotNet.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -57,21 +60,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseMonitor.cs" />
     <Compile Include="BuildController.cs" />
     <Compile Include="BuildProcessor.cs" />
     <Compile Include="NunitParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StatusMessageMonitor.cs" />
-    <Compile Include="TestResultMonitor.cs" />
-    <Compile Include="ToConsoleObserver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{0de4d48d-f841-4d78-92c2-47a5de68504e}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DockerUtils\DockerUtils.csproj">
       <Project>{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}</Project>
       <Name>DockerUtils</Name>

@@ -61,11 +61,11 @@ namespace SocketClient
                                     client.Disconnect();
                                     Environment.Exit(0);
                                 }
-                                OutputStatusMessage(statusMessage.Message);
+                                OutputStatusMessage(statusMessage);
                             }
                             else
                             {
-                                OutputStatusMessage(obj.GetType().FullName);
+                                OutputMessage(obj.GetType().FullName);
                             }
 
                         }
@@ -74,8 +74,8 @@ namespace SocketClient
                             Console.WriteLine(ex.Message);
                         }
                     },
-                    e => OutputStatusMessage(e.Message),
-                    () => OutputStatusMessage("Socket receiver completed"));
+                    e => OutputException(e),
+                    () => OutputMessage("Socket receiver completed"));
 
                 client.ConnectAsync().Wait();
 
@@ -88,7 +88,7 @@ namespace SocketClient
                 string mess = JsonConvert.SerializeObject(request);
 
                 protocol.SendAsync(mess);
-                OutputStatusMessage($"Request build {build}");
+                OutputMessage($"Request build {build}");
 
                 System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
                 //string line;
@@ -137,9 +137,32 @@ namespace SocketClient
             return s;
         }
 
-        private static void OutputStatusMessage(string s)
+        private static void OutputMessage(string message)
         {
-            Console.WriteLine($"##teamcity[message text='{Escape(s)}']");
+            Console.WriteLine($"##teamcity[message text='{Escape(message)}']");
+        }
+
+        private static void OutputException(Exception e)
+        {
+            Console.WriteLine($"##teamcity[message text='{Escape(e.Message)}'  status='ERROR']");
+            Console.WriteLine($"##teamcity[message text='{Escape(e.StackTrace)}'  status='ERROR']");
+        }
+
+        private static void OutputStatusMessage(StatusMessage mess)
+        {
+            if (!string.IsNullOrEmpty(mess.Message))
+            {
+                Console.WriteLine($"##teamcity[message text='{Escape(mess.Message)}']");
+            }
+            if (!string.IsNullOrEmpty(mess.Warning))
+            {
+                Console.WriteLine($"##teamcity[message text='{Escape(mess.Warning)}'  status='WARNING']");
+            }
+            if (!string.IsNullOrEmpty(mess.Error))
+            {
+                Console.WriteLine($"##teamcity[message text='{Escape(mess.Error)}'  status='ERROR']");
+            }
+            
         }
 
         private static void OutputTestMessage(TestExecutionResult result)

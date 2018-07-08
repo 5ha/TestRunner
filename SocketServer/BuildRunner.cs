@@ -1,14 +1,12 @@
 ﻿using BuildManager;
 using BuildManager.Model;
+using Common;
 using MessageModels;
 using Model;
+using Newtonsoft.Json;
 using SocketProtocol;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace SocketServer
 {
@@ -24,7 +22,6 @@ namespace SocketServer
         }
         public void OnCompleted()
         {
-            Console.WriteLine("DONE");
             _protocol.SendAsync("DONE");
         }
 
@@ -35,19 +32,16 @@ namespace SocketServer
                 Error = error.Message
             };
 
-            Console.WriteLine(mess.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(mess, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
         }
 
         public void OnNext(TestExecutionResult value)
         {
-            Console.WriteLine(value.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(value,new JsonSerializerSettings {  TypeNameHandling = TypeNameHandling.All}));
         }
 
         public void OnNext(StatusMessage value)
         {
-            Console.WriteLine(value.ToString());
             _protocol.SendAsync(JsonConvert.SerializeObject(value, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
         }
 
