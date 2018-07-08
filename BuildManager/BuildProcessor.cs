@@ -75,6 +75,14 @@ namespace BuildManager
 
                 // Get the tests from the docker image
 
+                string containerName = $"{request.Build}";
+
+                if (containerHelper.ContainerExists(containerName))
+                {
+                    var res = containerHelper.FindContainer(containerName);
+                    await containerHelper.RemoveContainer(res.ID);
+                }
+
                 CreateContainerResponse createContainerResponse = await containerHelper.CreateContainer(request.Image, request.Build, new List<string> { "ListTests" });
 
                 await containerHelper.StartContainer(createContainerResponse.ID);

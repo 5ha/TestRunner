@@ -136,6 +136,8 @@ namespace ContainerManager
                     await helper.RemoveContainer(containerName);
                 }
 
+                build.Commands.Insert(0, _instanceName);
+
                 CreateContainerResponse createContainerResponse = await helper.CreateContainer(build.ContainerImage, containerName, build.Commands);
 
                 if (createContainerResponse.Warnings != null)

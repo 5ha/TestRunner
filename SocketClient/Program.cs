@@ -1,4 +1,6 @@
 ﻿using BuildManager.Model;
+using log4net;
+using log4net.Config;
 using MessageModels;
 using Model;
 using Newtonsoft.Json;
@@ -6,6 +8,7 @@ using ReactiveSockets;
 using SocketProtocol;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -17,11 +20,19 @@ namespace SocketClient
     class Program
     {
         private static ReactiveClient client;
+        private static ILog _log;
 
         static void Main(string[] args)
         {
             try
             {
+                XmlConfigurator.Configure();
+
+                _log = LogManager.GetLogger("SocketClient");
+
+                string processInfo = $"Socket CLient running PID: {Process.GetCurrentProcess().Id}";
+                OutputMessage(processInfo);
+
                 if (args.Length == 0)
                     throw new ArgumentException("Usage: reactiveclient host build");
 
@@ -54,7 +65,7 @@ namespace SocketClient
                             {
                                 if (statusMessage.Message == "DONE")
                                 {
-                                    ShutDown();
+                                    ShutDown(0);
                                 }
                                 OutputStatusMessage(statusMessage);
                             }
@@ -67,10 +78,10 @@ namespace SocketClient
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.Message);
-                            ShutDown();
+                            ShutDown(1);
                         }
                     },
-                    e => { OutputException(e); ShutDown(); },
+                    e => { OutputException(e); ShutDown(1); },
                     () => OutputMessage("Socket receiver completed"));
 
                 client.ConnectAsync().Wait();
@@ -115,14 +126,19 @@ namespace SocketClient
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed: {0}", e);
+                OutputException(e);
+                ShutDown(1);
             }
         }
 
-        private static void ShutDown()
+        private static void ShutDown(int code)
         {
-            client.Disconnect();
-            Environment.Exit(0);
+            if (client.IsConnected)
+            {
+                client.Disconnect();
+            }
+            
+            Environment.Exit(code);
         }
 
         private static string Escape(string s)
@@ -141,37 +157,53 @@ namespace SocketClient
 
         private static void OutputMessage(string message)
         {
-            Console.WriteLine($"##teamcity[message text='{Escape(message)}']");
+            string mess = $"##teamcity[message text='{Escape(message)}']";
+            _log.Info(mess);
+            Console.WriteLine(mess);
         }
 
         private static void OutputException(Exception e)
         {
-            Console.WriteLine($"##teamcity[message text='{Escape(e.Message)}'  status='ERROR']");
-            Console.WriteLine($"##teamcity[message text='{Escape(e.StackTrace)}'  status='ERROR']");
+            string mess = $"##teamcity[message text='{Escape(e.Message)}'  status='ERROR']";
+            Console.WriteLine(mess);
+            _log.Error(mess);
+            //Console.WriteLine($"##teamcity[message text='{Escape(e.StackTrace)}'  status='ERROR']");
         }
 
         private static void OutputStatusMessage(StatusMessage mess)
         {
+            string m;
+
             if (!string.IsNullOrEmpty(mess.Message))
             {
-                Console.WriteLine($"##teamcity[message text='{Escape(mess.Message)}']");
+                m = $"##teamcity[message text='{Escape(mess.Message)}']";
+                Console.WriteLine(m);
+                _log.Info(m);
             }
             if (!string.IsNullOrEmpty(mess.Warning))
             {
-                Console.WriteLine($"##teamcity[message text='{Escape(mess.Warning)}'  status='WARNING']");
+                m = $"##teamcity[message text='{Escape(mess.Warning)}'  status='WARNING']";
+                Console.WriteLine(m);
+                _log.Warn(m);
             }
             if (!string.IsNullOrEmpty(mess.Error))
             {
-                Console.WriteLine($"##teamcity[message text='{Escape(mess.Error)}'  status='ERROR']");
-                ShutDown();
+                m = $"##teamcity[message text='{Escape(mess.Error)}'  status='ERROR']";
+                _log.Error(m);
+                Console.WriteLine(m);
+                ShutDown(1);
             }
             
         }
 
         private static void OutputTestMessage(TestExecutionResult result)
         {
-            Console.WriteLine($"##teamcity[testStarted name='{Escape(result.FullName)}']");
-            Console.WriteLine($"##teamcity[testFinished name='{Escape(result.FullName)}']");
+            string m;
+            m = $"##teamcity[testStarted name='{Escape(result.FullName)}']";
+            Console.WriteLine(m);
+
+            m = $"##teamcity[testFinished name='{Escape(result.FullName)}']";
+            Console.WriteLine(m);
         }
 
         /**

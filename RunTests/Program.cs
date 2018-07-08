@@ -1,6 +1,7 @@
 ﻿using HiQ.Builders;
 using HiQ.Interfaces;
 using InContainerShared;
+using log4net.Config;
 using MessageModels;
 using System;
 using System.Configuration;
@@ -16,9 +17,13 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
-            string instanceName = Environment.GetEnvironmentVariable("instance");
-            string requestQueueName = args[0];
-            string responseQueueName = args[1];
+            string instanceName = args[0];
+            string requestQueueName = args[1];
+            string responseQueueName = args[2];
+
+            log4net.GlobalContext.Properties["LogName"] = $"{instanceName}.log";
+
+            XmlConfigurator.Configure();
 
             string queueServer = ConfigurationManager.AppSettings["queueServer"];
             string queueUsername = ConfigurationManager.AppSettings["queueUsername"];
