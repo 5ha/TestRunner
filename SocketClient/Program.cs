@@ -16,6 +16,8 @@ namespace SocketClient
 {
     class Program
     {
+        private static ReactiveClient client;
+
         static void Main(string[] args)
         {
             try
@@ -30,24 +32,18 @@ namespace SocketClient
                 var build = args[1];
                 var image = args[2];
 
-                //if (args.Length > 1)
-                //    port = int.Parse(args[1]);
-
-                var client = new ReactiveClient(host, port);
+                client = new ReactiveClient(host, port);
                 var protocol = new StringChannel(client);
 
                 protocol.Receiver.SubscribeOn(TaskPoolScheduler.Default).Subscribe(
                     s =>
                     {
-
                         try
                         {
-
                             var obj = JsonConvert.DeserializeObject(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
                             StatusMessage statusMessage = obj as StatusMessage;
                             TestExecutionResult testResult = obj as TestExecutionResult;
-
 
                             if (testResult != null)
                             {
@@ -58,8 +54,7 @@ namespace SocketClient
                             {
                                 if (statusMessage.Message == "DONE")
                                 {
-                                    client.Disconnect();
-                                    Environment.Exit(0);
+                                    ShutDown();
                                 }
                                 OutputStatusMessage(statusMessage);
                             }
@@ -72,9 +67,10 @@ namespace SocketClient
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.Message);
+                            ShutDown();
                         }
                     },
-                    e => OutputException(e),
+                    e => { OutputException(e); ShutDown(); },
                     () => OutputMessage("Socket receiver completed"));
 
                 client.ConnectAsync().Wait();
@@ -123,6 +119,12 @@ namespace SocketClient
             }
         }
 
+        private static void ShutDown()
+        {
+            client.Disconnect();
+            Environment.Exit(0);
+        }
+
         private static string Escape(string s)
         {
             if (s == null) return null;
@@ -161,6 +163,7 @@ namespace SocketClient
             if (!string.IsNullOrEmpty(mess.Error))
             {
                 Console.WriteLine($"##teamcity[message text='{Escape(mess.Error)}'  status='ERROR']");
+                ShutDown();
             }
             
         }
