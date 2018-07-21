@@ -1,4 +1,5 @@
-﻿using DotNetty.Codecs;
+﻿using DockerUtils;
+using DotNetty.Codecs;
 using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
@@ -50,6 +51,8 @@ namespace SocketServer
                     }));
 
                 IChannel boundChannel = await bootstrap.BindAsync(port);
+
+
 
                 Console.ReadLine();
 

@@ -21,7 +21,8 @@ namespace DockerUtils
             {
                 if (__clientConfiguration == null)
                 {
-                    __clientConfiguration = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine"));
+                   __clientConfiguration = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine"));
+                   // __clientConfiguration = new DockerClientConfiguration(new Uri("tcp://localhost:4589"));
                 }
                 return __clientConfiguration;
             }
