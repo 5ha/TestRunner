@@ -1,10 +1,10 @@
 ﻿using BuildManager;
 using BuildManager.Model;
 using Common;
+using log4net;
 using MessageModels;
 using Model;
 using Newtonsoft.Json;
-using SocketProtocol;
 using System;
 using System.Threading.Tasks;
 
@@ -12,37 +12,68 @@ namespace SocketServer
 {
     public class BuildRunner : ITestRunObserver
     {
-        private readonly StringChannel _protocol;
+        ILog _log = LogManager.GetLogger("SocketServer.Buildrunner");
+
+        private Action<string> _send;
         private readonly BuildRunRequest _request;
 
-        public BuildRunner(StringChannel protocol, BuildRunRequest request)
+        public BuildRunner(BuildRunRequest request, Action<string> send)
         {
-            this._protocol = protocol;
+            _send = send;
             this._request = request;
         }
         public void OnCompleted()
         {
-            _protocol.SendAsync("DONE");
+            _send("DONE");
         }
 
         public void OnError(Exception error)
         {
-            StatusMessage mess = new StatusMessage
+            try
             {
-                Error = error.Message
-            };
+                StatusMessage mess = new StatusMessage
+                {
+                    Error = error.Message
+                };
 
-            _protocol.SendAsync(JsonConvert.SerializeObject(mess, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+                _send(JsonConvert.SerializeObject(mess, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+            }
+            catch (Exception e)
+            {
+                NotifySocketServerException(e);
+            }
         }
 
         public void OnNext(TestExecutionResult value)
         {
-            _protocol.SendAsync(JsonConvert.SerializeObject(value,new JsonSerializerSettings {  TypeNameHandling = TypeNameHandling.All}));
+            try
+            {
+                _send(JsonConvert.SerializeObject(value, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+            }
+            catch (Exception e)
+            {
+                NotifySocketServerException(e);
+            }
         }
 
         public void OnNext(StatusMessage value)
         {
-            _protocol.SendAsync(JsonConvert.SerializeObject(value, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+            try
+            {
+                _send(JsonConvert.SerializeObject(value, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+            }
+            catch (Exception e)
+            {
+                NotifySocketServerException(e);
+            }
+        }
+
+        private void NotifySocketServerException(Exception e)
+        {
+            string err = $"Socket server choked: {e.Message} {e.StackTrace}";
+            Console.WriteLine(err);
+            _log.Error("SocketProtocol Server Choked", e);
+
         }
 
         public Task StartBuild()
@@ -52,6 +83,6 @@ namespace SocketServer
             return buildController.KickOffBuild(_request, this);
         }
 
-        
+
     }
 }

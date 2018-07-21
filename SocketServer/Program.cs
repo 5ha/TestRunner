@@ -1,7 +1,11 @@
-﻿using log4net.Config;
+﻿using DotNetty.Codecs;
+using DotNetty.Handlers.Logging;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Libuv;
+using log4net.Config;
 using Model;
 using ReactiveSockets;
-using SocketProtocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,47 +16,51 @@ namespace SocketServer
 {
     class Program
     {
-        static void Main(string[] args)
+        private static int port = 1055;
+
+        static void Main() => RunServerAsync().Wait();
+
+        static async Task RunServerAsync()
         {
-            XmlConfigurator.Configure();
+            IEventLoopGroup bossGroup;
+            IEventLoopGroup workerGroup;
 
-            var port = 1055;
-            if (args.Length > 0)
-                port = int.Parse(args[0]);
+            var dispatcher = new DispatcherEventLoopGroup();
+            bossGroup = dispatcher;
+            workerGroup = new WorkerEventLoopGroup(dispatcher);
 
-            var server = new ReactiveListener(port);
 
-            server.Connections.Subscribe(socket =>
+            try
             {
-                Console.WriteLine("New socket connected {0}", socket.GetHashCode());
+                var bootstrap = new ServerBootstrap();
+                bootstrap.Group(bossGroup, workerGroup);
+                bootstrap.Channel<TcpServerChannel>();
 
-                var protocol = new StringChannel(socket);
+                bootstrap
+                    .Option(ChannelOption.SoBacklog, 100)
+                    .Handler(new LoggingHandler("SRV-LSTN"))
+                    .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
+                    {
+                        IChannelPipeline pipeline = channel.Pipeline;
+                        pipeline.AddLast(new LoggingHandler("SRV-CONN"));
+                        pipeline.AddLast("framing-enc", new LengthFieldPrepender(2));
+                        pipeline.AddLast("framing-dec", new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 2, 0, 2));
 
-  
-                protocol.Receiver.Subscribe(
-                    s => {
-                        Console.WriteLine(s);
+                        pipeline.AddLast("echo", new SocketServerHandler());
+                    }));
 
-                        BuildRunRequest request = Newtonsoft.Json.JsonConvert.DeserializeObject<BuildRunRequest>(s);
+                IChannel boundChannel = await bootstrap.BindAsync(port);
 
-                        BuildRunner buildRunner = new BuildRunner(protocol, request);
-                        buildRunner.StartBuild().Wait();
-                    }
-                    
-                    ,
-                    e => Console.WriteLine(e),
-                    () => Console.WriteLine("Socket receiver completed"));
+                Console.ReadLine();
 
-                
-
-                socket.Disconnected += (sender, e) => Console.WriteLine("Socket disconnected {0}", sender.GetHashCode());
-                socket.Disposed += (sender, e) => Console.WriteLine("Socket disposed {0}", sender.GetHashCode());
-            });
-
-            server.Start();
-
-            Console.WriteLine("Press Enter to exit");
-            Console.ReadLine();
+                await boundChannel.CloseAsync();
+            }
+            finally
+            {
+                await Task.WhenAll(
+                    bossGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)),
+                    workerGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1)));
+            }
         }
     }
 }
