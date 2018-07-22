@@ -17,9 +17,9 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
-            string instanceName = args[0];
-            string requestQueueName = args[1];
-            string responseQueueName = args[2];
+            string requestQueueName = args[0];
+            string responseQueueName = args[1];
+            string instanceName = args[2];
 
             log4net.GlobalContext.Properties["LogName"] = $"{instanceName}.log";
 

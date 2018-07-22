@@ -94,13 +94,16 @@ namespace BuildManager
 
                 foreach(string testName in testNames)
                 {
-                    RunTest item = new RunTest
+                    if (!string.IsNullOrEmpty(testName))
                     {
-                        Build = request.Build,
-                        FullName = testName.Trim()
-                    };
+                        RunTest item = new RunTest
+                        {
+                            Build = request.Build,
+                            FullName = testName.Trim()
+                        };
 
-                    tests.Add(item);
+                        tests.Add(item);
+                    }
                 }
 
                 AddTestsToDictionary(_expectedTests, tests);
