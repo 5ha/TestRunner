@@ -49,14 +49,20 @@ namespace TestRunner
 
             receiver.Receive<RunTest>((m) =>
             {
-                Console.WriteLine($"Running {m.FullName} ...");
-                var responseXML = executor.Execute(m);
+                try
+                {
+                    Console.WriteLine($"Running {m.FullName} ...");
+                    var responseXML = executor.Execute(m);
 
-                var responseNode = responseXML.SelectSingleNode("//test-case");
-                var testResult = responseNode.Attributes["result"].Value;
-                Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
+                    var responseNode = responseXML.SelectSingleNode("//test-case");
+                    var testResult = responseNode.Attributes["result"].Value;
+                    Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
 
-                sender.Send(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
+                    sender.Send(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
+                } catch(Exception e)
+                {
+                    sender.Send(new StatusMessage { Application = "TestRunner", Process = instanceName,  Error = e.Message });
+                }
             });
 
             Console.WriteLine("Listening ...");
