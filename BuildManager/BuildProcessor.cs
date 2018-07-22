@@ -16,6 +16,7 @@ namespace BuildManager
     public class BuildProcessor : IDisposable
     {
         private readonly string _host;
+        private readonly string _vHost;
         private readonly string _username;
         private readonly string _password;
         private readonly string _pathToBuildFolder;
@@ -38,12 +39,13 @@ namespace BuildManager
         NunitParser _parser;
 
 
-        public BuildProcessor(string host, string username, string password, string pathToBuildFolder, string testSearchDirectory, string repository, string image, string build)
+        public BuildProcessor(string host, string vHost, string username, string password, string pathToBuildFolder, string testSearchDirectory, string repository, string image, string build)
         {
             _testResultMonitor = new TestResultMonitor();
             _statusMessageMonitor = new StatusMessageMonitor();
 
             _host = host;
+            _vHost = vHost;
             _username = username;
             _password = password;
             _pathToBuildFolder = pathToBuildFolder;
@@ -205,7 +207,7 @@ namespace BuildManager
         private ISender ConfigureSender(string queue)
         {
             IQueueBuilder queueBuilder = new RabbitBuilder();
-            ISender sender = queueBuilder.ConfigureTransport(_host, _username, _password)
+            ISender sender = queueBuilder.ConfigureTransport(_host, _vHost, _username, _password)
                 .ISendTo(queue)
                 .Build();
             return sender;
@@ -214,7 +216,7 @@ namespace BuildManager
         private IReceiver ConfigureReceiver(string queue)
         {
             IQueueBuilder queueBuilder = new RabbitBuilder();
-            IReceiver receiver = queueBuilder.ConfigureTransport(_host, _username, _password)
+            IReceiver receiver = queueBuilder.ConfigureTransport(_host, _vHost, _username, _password)
                 .IReceiveFrom(queue)
                 .IReceiveForever()
                 .Build();

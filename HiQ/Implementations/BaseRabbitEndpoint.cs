@@ -8,12 +8,14 @@ namespace HiQ.Implementations
         protected string _exchangeName;
         protected string _pathName;
         string _hostName;
+        string _vhost;
         string _userName;
         string _password;
 
-        public BaseRabbitEndpoint(string hostName, string userName, string password, string exchangeName, string pathName)
+        public BaseRabbitEndpoint(string hostName, string vHost, string userName, string password, string exchangeName, string pathName)
         {
             _hostName = hostName;
+            _vhost = vHost;
             _userName = userName;
             _password = password;
             _exchangeName = $"{exchangeName}_{Guid.NewGuid().ToString("N")}";
@@ -27,7 +29,7 @@ namespace HiQ.Implementations
             {
                 if (__connection == null)
                 {
-                    __connection = new ConnectionFactory() { HostName = _hostName, UserName = _userName, Password = _password }
+                    __connection = new ConnectionFactory() { HostName = _hostName, UserName = _userName, Password = _password, VirtualHost = _vhost }
                     .CreateConnection();
                 }
 

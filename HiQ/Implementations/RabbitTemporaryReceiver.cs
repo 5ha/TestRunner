@@ -15,9 +15,9 @@ namespace HiQ.Implementations
         private TimeSpan _messageTimeout;
         private Action _onNoMoreMessages;
 
-        public RabbitTemporaryReceiver(string hostName, string userName, string password, string exchangeName, string pathName,
+        public RabbitTemporaryReceiver(string hostName, string vHost, string userName, string password, string exchangeName, string pathName,
             TimeSpan startUpWaitTime, TimeSpan messageTimeout, Action onNoMoreMessages)
-            : base(hostName, userName, password, exchangeName, pathName)
+            : base(hostName, vHost, userName, password, exchangeName, pathName)
         {
             _startUpWaitTime = startUpWaitTime;
             _messageTimeout = messageTimeout;

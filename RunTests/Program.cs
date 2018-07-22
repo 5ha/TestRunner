@@ -26,19 +26,20 @@ namespace TestRunner
             XmlConfigurator.Configure();
 
             string queueServer = ConfigurationManager.AppSettings["queueServer"];
+            string queueVhost = ConfigurationManager.AppSettings["queueVhost"];
             string queueUsername = ConfigurationManager.AppSettings["queueUsername"];
             string queuePassword = ConfigurationManager.AppSettings["queuePassword"];
             string directoryToSearch = ConfigurationManager.AppSettings["directoryToSearch"];
 
             IQueueBuilder queueBuilder = new RabbitBuilder();
             receiver =
-                queueBuilder.ConfigureTransport(queueServer, queueUsername, queuePassword)
+                queueBuilder.ConfigureTransport(queueServer, queueVhost, queueUsername, queuePassword)
                 .IReceiveFrom(requestQueueName)
                 .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(5), ShutDown)
                 .Build();
 
             queueBuilder = new RabbitBuilder();
-            sender = queueBuilder.ConfigureTransport(queueServer, queueUsername, queuePassword)
+            sender = queueBuilder.ConfigureTransport(queueServer, queueVhost, queueUsername, queuePassword)
                 .ISendTo(responseQueueName)
                 .Build();
 

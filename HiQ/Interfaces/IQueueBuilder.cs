@@ -8,6 +8,6 @@ namespace HiQ.Interfaces
 {
     public interface IQueueBuilder
     {
-        IDirectionSelector ConfigureTransport(string hostName, string userName, string password);
+        IDirectionSelector ConfigureTransport(string hostName, string vHost, string userName, string password);
     }
 }

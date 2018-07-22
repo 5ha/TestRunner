@@ -15,6 +15,7 @@ namespace HiQTests
     public class BuilderTests
     {
         private string _hostName = "my-rabbit";
+        private string _vHost = "";
         private string _userName = "remote";
         private string _password = "remote";
         private string _queueName = "BuilderTests";
@@ -24,7 +25,7 @@ namespace HiQTests
         {
             IQueueBuilder sut = new RabbitBuilder();
 
-            var res = sut.ConfigureTransport(_hostName, _userName, _password);
+            var res = sut.ConfigureTransport(_hostName, _vHost, _userName, _password);
 
             Assert.IsInstanceOf<IDirectionSelector>(res);
         }
@@ -35,7 +36,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .ISendTo(_queueName);
 
             Assert.IsInstanceOf<ISenderBuilder>(res);
@@ -47,7 +48,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .ISendTo(_queueName)
                 .Build();
 
@@ -60,7 +61,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName);
 
             Assert.IsInstanceOf<IReceiveTypeSelector>(res);
@@ -72,7 +73,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName)
                 .IReceiveForever();
 
@@ -85,7 +86,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName)
                 .IReceiveForever()
                 .Build();
@@ -99,7 +100,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName)
                 .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1), () => { });
 
@@ -112,7 +113,7 @@ namespace HiQTests
             IQueueBuilder sut = new RabbitBuilder();
 
             var res =
-                sut.ConfigureTransport(_hostName, _userName, _password)
+                sut.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName)
                 .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1), () => { })
                 .Build();
@@ -126,11 +127,11 @@ namespace HiQTests
             IQueueBuilder builder;
 
             builder = new RabbitBuilder();
-            var sender = builder.ConfigureTransport(_hostName, _userName, _password)
+            var sender = builder.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .ISendTo(_queueName).Build();
 
             builder = new RabbitBuilder();
-            var receiver = builder.ConfigureTransport(_hostName, _userName, _password)
+            var receiver = builder.ConfigureTransport(_hostName, _vHost, _userName, _password)
                 .IReceiveFrom(_queueName).IReceiveForever().Build();
 
             String message = "Test Message";

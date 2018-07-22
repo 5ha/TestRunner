@@ -6,6 +6,7 @@ using MessageModels;
 using Model;
 using Newtonsoft.Json;
 using System;
+using System.Configuration;
 using System.Threading.Tasks;
 
 namespace SocketServer
@@ -17,10 +18,20 @@ namespace SocketServer
         private Action<string> _send;
         private readonly BuildRunRequest _request;
 
+        string _queueServer;
+        string _queueVhost;
+        string _queueUsername;
+        string _queuePassword;
+
         public BuildRunner(BuildRunRequest request, Action<string> send)
         {
             _send = send;
             this._request = request;
+
+            _queueServer = ConfigurationManager.AppSettings["queueServer"];
+            _queueVhost = ConfigurationManager.AppSettings["queueVhost"];
+            _queueUsername = ConfigurationManager.AppSettings["queueUsername"];
+            _queuePassword = ConfigurationManager.AppSettings["queuePassword"];
         }
         public void OnCompleted()
         {
@@ -78,7 +89,7 @@ namespace SocketServer
 
         public Task StartBuild()
         {
-            BuildController buildController = new BuildController();
+            BuildController buildController = new BuildController(_queueServer, _queueVhost, _queueUsername, _queuePassword);
 
             return buildController.KickOffBuild(_request, this);
         }

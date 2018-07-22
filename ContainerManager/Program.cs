@@ -3,6 +3,7 @@ using HiQ.Interfaces;
 using MessageModels;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,8 +13,18 @@ namespace ContainerManager
     {
         private static List<Process> processes = new List<Process>();
 
+        static string _queueServer;
+        static string _queueVhost;
+        static string _queueUsername;
+        static string _queuePassword;
+
         static void Main(string[] args)
         {
+            _queueServer = ConfigurationManager.AppSettings["queueServer"];
+            _queueVhost = ConfigurationManager.AppSettings["queueVhost"];
+            _queueUsername = ConfigurationManager.AppSettings["queueUsername"];
+            _queuePassword = ConfigurationManager.AppSettings["queuePassword"];
+
             MainAsync(args).GetAwaiter().GetResult();
         }
 
@@ -32,7 +43,7 @@ namespace ContainerManager
 
             // Subscribe to Build Messages
             IQueueBuilder queueBuilder = new RabbitBuilder();
-            IReceiver receiver = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+            IReceiver receiver = queueBuilder.ConfigureTransport(_queueServer, _queueVhost, _queueUsername, _queuePassword)
                 .IReceiveFrom(QueueNames.Build())
                 .IReceiveForever()
                 .Build();
@@ -54,7 +65,7 @@ namespace ContainerManager
             IQueueBuilder queueBuilder = new RabbitBuilder();
             List<Task> tasks = new List<Task>();
 
-            using (ISender statusMessageSender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+            using (ISender statusMessageSender = queueBuilder.ConfigureTransport(_queueServer, _queueVhost, _queueUsername, _queuePassword)
                 .ISendTo(QueueNames.Status(build.Build))
                 .Build())
             {

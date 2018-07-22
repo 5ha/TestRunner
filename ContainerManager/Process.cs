@@ -6,6 +6,7 @@ using MessageModels;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -19,10 +20,20 @@ namespace ContainerManager
         private string _instanceName;
         CancellationToken _cancellationToken;
 
+        string _queueServer;
+        string _queueVhost;
+        string _queueUsername;
+        string _queuePassword;
+
         public Process(string instanceName, CancellationToken cancellationToken)
         {
             _instanceName = instanceName;
             _cancellationToken = cancellationToken;
+
+            _queueServer = ConfigurationManager.AppSettings["queueServer"];
+            _queueVhost = ConfigurationManager.AppSettings["queueVhost"];
+            _queueUsername = ConfigurationManager.AppSettings["queueUsername"];
+            _queuePassword = ConfigurationManager.AppSettings["queuePassword"];
         }
 
         public void Initialise()
@@ -35,7 +46,7 @@ namespace ContainerManager
                     currentBuild = await GetCurrentBuild();
 
                     IQueueBuilder queueBuilder = new RabbitBuilder();
-                    using (ISender statusMessageSender = queueBuilder.ConfigureTransport("my-rabbit", "remote", "remote")
+                    using (ISender statusMessageSender = queueBuilder.ConfigureTransport(_queueServer, _queueVhost, _queueUsername, _queuePassword)
                         .ISendTo(QueueNames.Status(currentBuild.Build))
                         .Build())
                     {

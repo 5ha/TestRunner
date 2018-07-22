@@ -13,8 +13,8 @@ namespace HiQ.Implementations
 {
     public class RabbitPermanentReceiver : BaseRabbitEndpoint, IReceiver
     {
-        public RabbitPermanentReceiver(string hostName, string userName, string password, string exchangeName, string pathName)
-            : base(hostName, userName, password, exchangeName, pathName)
+        public RabbitPermanentReceiver(string hostName, string vHost, string userName, string password, string exchangeName, string pathName)
+            : base(hostName, vHost, userName, password, exchangeName, pathName)
         {
 
         }

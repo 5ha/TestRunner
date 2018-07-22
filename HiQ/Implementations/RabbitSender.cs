@@ -7,8 +7,8 @@ namespace HiQ.Implementations
 {
     public class RabbitSender : BaseRabbitEndpoint, ISender
     {
-        public RabbitSender(string hostName, string userName, string password, string exchangeName, string pathName)
-            :base(hostName, userName, password, exchangeName, pathName)
+        public RabbitSender(string hostName, string vHost, string userName, string password, string exchangeName, string pathName)
+            :base(hostName, vHost, userName, password, exchangeName, pathName)
         {
 
         }

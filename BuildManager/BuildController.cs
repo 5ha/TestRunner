@@ -6,9 +6,21 @@ namespace BuildManager
 {
     public class BuildController
     {
+        private readonly string _host;
+        private readonly string _vHost;
+        private readonly string _username;
+        private readonly string _password;
+
+        public BuildController(string host, string vHost, string username, string password)
+        {
+            _host = host;
+            _vHost = vHost;
+            _username = username;
+            _password = password;
+        }
         public async Task KickOffBuild(BuildRunRequest request, ITestRunObserver observer = null)
         {
-            using (var processor = new BuildProcessor("my-rabbit", "remote", "remote", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest", "shawnseabrook", "myimage", request.Build))
+            using (var processor = new BuildProcessor(_host, _vHost, _username, _password, @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest", "shawnseabrook", "myimage", request.Build))
             {
                 ToConsoleObserver consoleObserver = new ToConsoleObserver();
                 ToLogObserver logObserver = new ToLogObserver("BuildManager");

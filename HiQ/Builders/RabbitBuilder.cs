@@ -13,6 +13,7 @@ namespace HiQ.Builders
     {
         string _queueName;
         string _hostName;
+        string _vHost;
         string _userName;
         string _password;
         Direction _direction;
@@ -21,9 +22,10 @@ namespace HiQ.Builders
         private TimeSpan _messageWaitTimeout;
         private Action _whenNoMoreMessages;
 
-        IDirectionSelector IQueueBuilder.ConfigureTransport(string hostName, string userName, string password)
+        IDirectionSelector IQueueBuilder.ConfigureTransport(string hostName, string vHost, string userName, string password)
         {
             _hostName = hostName;
+            _vHost = vHost;
             _userName = userName;
             _password = password;
 
@@ -64,18 +66,18 @@ namespace HiQ.Builders
 
         ISender ISenderBuilder.Build()
         {
-            return new RabbitSender(_hostName, _userName, _password, _queueName, _queueName);
+            return new RabbitSender(_hostName, _vHost, _userName, _password, _queueName, _queueName);
         }
 
         IReceiver ITemporaryReceiverBuilder.Build()
         {
-            return new RabbitTemporaryReceiver(_hostName, _userName, _password, _queueName, _queueName, _startupTime, _messageWaitTimeout, _whenNoMoreMessages);
+            return new RabbitTemporaryReceiver(_hostName, _vHost, _userName, _password, _queueName, _queueName, _startupTime, _messageWaitTimeout, _whenNoMoreMessages);
 
         }
 
         IReceiver IPermanentReceiverBuilder.Build()
         {
-            return new RabbitPermanentReceiver(_hostName, _userName, _password, _queueName, _queueName);
+            return new RabbitPermanentReceiver(_hostName, _vHost, _userName, _password, _queueName, _queueName);
         }
     }
 }
