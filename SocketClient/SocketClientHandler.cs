@@ -17,12 +17,11 @@ namespace SocketClient
     public class SocketClientHandler : ChannelHandlerAdapter
     {
         readonly IByteBuffer byteBuffer;
-        readonly ILog _log;
+        public static readonly ILog _log = LogManager.GetLogger("SocketClient");
         private static bool _isShuttingDown;
 
         public SocketClientHandler(BuildRunRequest request)
         {
-            _log = LogManager.GetLogger("SocketClient");
             string processInfo = $"Socket CLient running PID: {Process.GetCurrentProcess().Id}";
             OutputMessage(processInfo);
 
@@ -83,9 +82,12 @@ namespace SocketClient
         {
             Console.WriteLine("Exception: " + exception);
             context.CloseAsync();
+
+            SocketClientHandler.OutputException(exception);
+            SocketClientHandler.ShutDown(1);
         }
 
-        private void ShutDown(int code)
+        public static void ShutDown(int code)
         {
             _isShuttingDown = true;
             //if (client.IsConnected)
@@ -96,7 +98,7 @@ namespace SocketClient
             Environment.Exit(code);
         }
 
-        private string Escape(string s)
+        public static string Escape(string s)
         {
             if (s == null) return null;
 
@@ -110,14 +112,14 @@ namespace SocketClient
             return s;
         }
 
-        private void OutputMessage(string message)
+        public static void OutputMessage(string message)
         {
             string mess = $"##teamcity[message text='{Escape(message)}']";
             _log.Info(mess);
             Console.WriteLine(mess);
         }
 
-        private void HanldeException(Exception ex)
+        public static void HanldeException(Exception ex)
         {
             Exception currentExcepition = ex;
 
@@ -130,17 +132,23 @@ namespace SocketClient
 
         }
 
-        private void OutputException(Exception e)
+        public static void OutputException(Exception e)
         {
-            string mess = $"##teamcity[message text='{Escape(e.Message)}'  status='ERROR']";
+            Exception ex = e;
+            while(ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+            }
+            string mess = $"##teamcity[message text='{Escape(ex.Message)}'  status='ERROR' errorDetails='{Escape(ex.StackTrace)}']";
             Console.WriteLine(mess);
+            Console.Out.Flush();
             _log.Error(mess);
 
-            // do not shutdown at this point, we might still be handling inner excepstins
+            // do not shutdown at this point, we might still be handling inner excepstions
             //Console.WriteLine($"##teamcity[message text='{Escape(e.StackTrace)}'  status='ERROR']");
         }
 
-        private void OutputStatusMessage(StatusMessage mess)
+        public static void OutputStatusMessage(StatusMessage mess)
         {
             string m;
 

@@ -87,7 +87,18 @@ namespace SocketClient
                     Image = image
                 };
 
+
+            try
+            {
                 RunClientAsync(request).Wait();
+
+            }catch(Exception e)
+            {
+                SocketClientHandler.OutputException(e);
+                SocketClientHandler.ShutDown(1);
+            }
+
+            Console.ReadLine();
         }
 
 
