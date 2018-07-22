@@ -12,6 +12,6 @@ Test Message:
 {"Build":"56","FullName":"SystemUnderTest.PassingTest"}
 
 RunTests
-docker container run -it shawnseabrook/build:56 RunTests process0 56_request 56_response
+docker container run -it shawnseabrook/build:80 RunTests process0 80_request 80_response
 
 
