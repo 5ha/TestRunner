@@ -18,6 +18,7 @@ using System.Net;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SocketClient
@@ -39,6 +40,7 @@ namespace SocketClient
 
             try
             {
+                SocketClientHandler.OutputMessage("Pre bootstrap");
                 var bootstrap = new Bootstrap();
                 bootstrap
                     .Group(group)
@@ -46,6 +48,7 @@ namespace SocketClient
                     .Option(ChannelOption.TcpNodelay, true)
                     .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                     {
+                        SocketClientHandler.OutputMessage("In handler");
                         IChannelPipeline pipeline = channel.Pipeline;
 
                         pipeline.AddLast(new LoggingHandler());
@@ -53,11 +56,20 @@ namespace SocketClient
                         pipeline.AddLast("framing-dec", new LengthFieldBasedFrameDecoder(ushort.MaxValue, 0, 2, 0, 2));
 
                         pipeline.AddLast("echo", new SocketClientHandler(request));
+
+                        SocketClientHandler.OutputMessage("Handlers added");
                     }));
 
+                SocketClientHandler.OutputMessage("Pre channel connect");
                 IChannel clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_host), _port));
+                SocketClientHandler.OutputMessage("Post channel connect");
 
-                Console.ReadLine();
+                string s = Console.ReadLine();
+                while (string.IsNullOrEmpty(s))
+                {
+                    Console.ReadLine();
+                }
+                SocketClientHandler.OutputMessage("Post inner readline");
 
                 await clientChannel.CloseAsync();
             }
@@ -67,7 +79,7 @@ namespace SocketClient
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
                 XmlConfigurator.Configure();
 
@@ -87,18 +99,32 @@ namespace SocketClient
                     Image = image
                 };
 
+            //bool sleep = true;
+            //while (sleep)
+            //{
+            //    Thread.Sleep(1000);
+            //}
+
 
             try
             {
-                RunClientAsync(request).Wait();
+                SocketClientHandler.OutputMessage("Starting wait");
+                await RunClientAsync(request).ConfigureAwait(true);
+                for(int i = 0; i < 1000; i++)
+                {
+                    Thread.Sleep(1000);
+                }
 
-            }catch(Exception e)
+            }
+            catch(Exception e)
             {
                 SocketClientHandler.OutputException(e);
                 SocketClientHandler.ShutDown(1);
             }
 
+            SocketClientHandler.OutputMessage("Before Readline");
             Console.ReadLine();
+            SocketClientHandler.OutputMessage("Exiting");
         }
 
 

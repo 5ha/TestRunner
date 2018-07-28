@@ -31,16 +31,24 @@ namespace SocketClient
             this.byteBuffer.WriteBytes(byteArray);
         }
 
-        public override void ChannelActive(IChannelHandlerContext context) => context.WriteAndFlushAsync(this.byteBuffer);
+        public override void ChannelActive(IChannelHandlerContext context)
+        {
+            SocketClientHandler.OutputMessage("Channel Active pre write");
+            context.WriteAndFlushAsync(this.byteBuffer);
+            SocketClientHandler.OutputMessage("Channel Active post write");
+        }
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
+            SocketClientHandler.OutputMessage("Channel reading");
             var byteBuffer = message as IByteBuffer;
             if (byteBuffer != null)
             {
                 try
                 {
                     string s = byteBuffer.ToString(Encoding.UTF8);
+
+                    SocketClientHandler.OutputMessage("RECEIVED RAW: {s}");
 
                     _log.Info($"RECEIVED RAW: {s}");
                     var obj = JsonConvert.DeserializeObject(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
@@ -117,6 +125,7 @@ namespace SocketClient
             string mess = $"##teamcity[message text='{Escape(message)}']";
             _log.Info(mess);
             Console.WriteLine(mess);
+            Console.Out.Flush();
         }
 
         public static void HanldeException(Exception ex)
@@ -156,12 +165,14 @@ namespace SocketClient
             {
                 m = $"##teamcity[message text='{Escape(mess.Message)}']";
                 Console.WriteLine(m);
+                Console.Out.Flush();
                 _log.Info(m);
             }
             if (!string.IsNullOrEmpty(mess.Warning))
             {
                 m = $"##teamcity[message text='{Escape(mess.Warning)}'  status='WARNING']";
                 Console.WriteLine(m);
+                Console.Out.Flush();
                 _log.Warn(m);
             }
             if (!string.IsNullOrEmpty(mess.Error))
@@ -169,6 +180,7 @@ namespace SocketClient
                 m = $"##teamcity[message text='{Escape(mess.Error)}'  status='ERROR']";
                 _log.Error(m);
                 Console.WriteLine(m);
+                Console.Out.Flush();
                 ShutDown(1);
             }
 
@@ -179,9 +191,11 @@ namespace SocketClient
             string m;
             m = $"##teamcity[testStarted name='{Escape(result.FullName)}']";
             Console.WriteLine(m);
+            Console.Out.Flush();
 
             m = $"##teamcity[testFinished name='{Escape(result.FullName)}']";
             Console.WriteLine(m);
+            Console.Out.Flush();
         }
     }
 }
