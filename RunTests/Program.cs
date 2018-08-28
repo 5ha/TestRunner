@@ -17,19 +17,19 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
-            string requestQueueName = args[0];
-            string responseQueueName = args[1];
-            string instanceName = args[2];
+
+            string requestQueueName = System.Environment.GetEnvironmentVariable("TESTER_REQUEST_QUEUE");
+            string responseQueueName = System.Environment.GetEnvironmentVariable("TESTER_RESPONSE_QUEUE");
+            string instanceName = System.Environment.GetEnvironmentVariable("TESTER_INSTANCE");
+            string queueServer = System.Environment.GetEnvironmentVariable("TESTER_SERVER");
+            string queueVhost = System.Environment.GetEnvironmentVariable("TESTER_VHOST");
+            string queueUsername = System.Environment.GetEnvironmentVariable("TESTER_USERNAME");
+            string queuePassword = System.Environment.GetEnvironmentVariable("TESTER_PASSWORD");
+            string directoryToSearch = System.Environment.GetEnvironmentVariable("TESTER_SEARCHDIR");
 
             log4net.GlobalContext.Properties["LogName"] = $"{instanceName}.log";
 
             XmlConfigurator.Configure();
-
-            string queueServer = ConfigurationManager.AppSettings["queueServer"];
-            string queueVhost = ConfigurationManager.AppSettings["queueVhost"];
-            string queueUsername = ConfigurationManager.AppSettings["queueUsername"];
-            string queuePassword = ConfigurationManager.AppSettings["queuePassword"];
-            string directoryToSearch = ConfigurationManager.AppSettings["directoryToSearch"];
 
             IQueueBuilder queueBuilder = new RabbitBuilder();
             receiver =

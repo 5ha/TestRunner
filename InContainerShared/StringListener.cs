@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 
 namespace InContainerShared
 {
-    public class Listener : ITestEventListener
+    public class StringListener : ITestEventListener
     {
+        public StringBuilder TestResults = new StringBuilder();
+
         public void OnTestEvent(string report)
         {
-            Console.WriteLine(report);
+            TestResults.Append(report);
         }
     }
 }

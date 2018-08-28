@@ -1,4 +1,5 @@
 ﻿using Docker.DotNet.Models;
+using DockerComposeUtils;
 using DockerUtils;
 using HiQ.Builders;
 using HiQ.Interfaces;
@@ -8,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -142,39 +144,13 @@ namespace ContainerManager
 
             try
             {
-                if (helper.ContainerExists(containerName))
+                using (ComposeWrapper compose = new ComposeWrapper(_instanceName, ConfigurationManager.AppSettings["yamlBasePath"], TimeSpan.FromMinutes(int.Parse(ConfigurationManager.AppSettings["composeExecutionTimeoutMinutes"]))))
                 {
-                    await helper.RemoveContainer(containerName);
+                    await compose.RunCompose(build.Yaml);
                 }
 
-                build.Commands.Add(_instanceName);
 
-                CreateContainerResponse createContainerResponse = await helper.CreateContainer(build.ContainerImage, containerName, build.Commands);
-
-                if (createContainerResponse.Warnings != null)
-                {
-                    notify((null, String.Join("\r\n", createContainerResponse.Warnings.ToArray()),null));
-                }
-
-                bool started = await helper.StartContainer(createContainerResponse.ID);
-
-                notify((null, $"Could not start container {createContainerResponse.ID}", null));
-
-                (stdOut, stdErr) = await helper.AwaitContainer(createContainerResponse.ID);
-
-                if (!string.IsNullOrEmpty(stdOut))
-                {
-                    notify((stdOut, null, null));
-                }
-
-                if (!string.IsNullOrEmpty(stdErr))
-                {
-                    notify((null, null, stdErr));
-                }
-
-                notify(($"Container {createContainerResponse.ID} completed", null, null));
-
-
+                notify(($"{_instanceName} Completed", null, null));
             }
             catch (Exception ex)
             {

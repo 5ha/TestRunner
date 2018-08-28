@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Xml;
 
 namespace MessageModels
@@ -7,6 +8,9 @@ namespace MessageModels
     {
         public string Build { get; set; }
         public string FullName { get; set; }
+        public bool Passed { get; set; }
+        public TimeSpan Runtime { get; set; }
+        public string Output { get; set; }
         public XmlNode Result { get; set; }
 
         public override string ToString()

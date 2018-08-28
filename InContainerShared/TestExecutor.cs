@@ -87,10 +87,12 @@ namespace InContainerShared
             return res;
         }
 
-        public void ExecuteAll()
+        public void ExecuteAll(ITestEventListener listener = null)
         {
+            if (listener == null) listener = new ConsoleListener();
+
             var filterBuilder = _filterService.GetTestFilterBuilder();
-            _runner.Run(new Listener(), filterBuilder.GetFilter());
+            _runner.Run(listener, filterBuilder.GetFilter());
         }
     }
 }

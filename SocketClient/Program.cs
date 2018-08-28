@@ -13,6 +13,7 @@ using ReactiveSockets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
@@ -81,23 +82,27 @@ namespace SocketClient
 
         static async Task Main(string[] args)
         {
-                XmlConfigurator.Configure();
+            XmlConfigurator.Configure();
 
-                if (args.Length == 0)
-                    throw new ArgumentException("Usage: reactiveclient host build");
+            if (args.Length == 0)
+                throw new ArgumentException("Usage: reactiveclient host build");
 
-                var host = args[0];
+            var host = args[0];
 
-                var port = 1055;
+            var port = 1055;
 
-                var build = args[1];
-                var image = args[2];
+            var build = args[1];
+            var image = args[2];
+            var yamlFileLocation = args[3];
 
-                BuildRunRequest request = new BuildRunRequest
-                {
-                    Build = build,
-                    Image = image
-                };
+            string yaml = File.ReadAllText(yamlFileLocation);
+
+            BuildRunRequest request = new BuildRunRequest
+            {
+                Build = build,
+                TestContainerImage = image,
+                Yaml = yaml
+            };
 
             //bool sleep = true;
             //while (sleep)
@@ -110,13 +115,13 @@ namespace SocketClient
             {
                 SocketClientHandler.OutputMessage("Starting wait");
                 await RunClientAsync(request).ConfigureAwait(true);
-                for(int i = 0; i < 1000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     Thread.Sleep(1000);
                 }
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 SocketClientHandler.OutputException(e);
                 SocketClientHandler.ShutDown(1);

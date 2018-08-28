@@ -6,13 +6,26 @@ Run Socket Client:
 C:\Users\shawn\source\repos\TestNUnitRunner\SocketClient\bin\Debug\SocketClient.exe 127.0.0.1 82 shawnseabrook/build:82
 
 Build Message:
-{"ContainerImage":"shawnseabrook/build:82","Build":"82","Commands":["RunTests","82_request","82_response"]}
+{"ContainerImage":"shawnseabrook/build:84","Build":"84","Commands":["RunTests","84_request","84_response"]}
 
 
 Test Message:
 {"Build":"56","FullName":"SystemUnderTest.PassingTest"}
 
 RunTests
-docker container run -it shawnseabrook/build:82 RunTests process0 82_request 82_response
+docker container run -it shawnseabrook/build:86 RunTests 86_request 86_response process0 
 
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+docker run -d -p 4444:4444 --network my-net --hostname selenium-server selenium/standalone-chrome
+
+docker run -it --network my-net my-net chrometest cmd
+
+docker-compose run tester cmd
+
+
+docker rm $(docker ps -a -q)
+
+docker images --format "{{.Repository}}:{{.Tag}}" | Where-Object {($_ -like '*shawn*')} | % { docker rmi $_ -f }
 

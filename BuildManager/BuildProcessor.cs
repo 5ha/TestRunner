@@ -59,11 +59,16 @@ namespace BuildManager
             _parser = new NunitParser();
         }
 
+
+        private void UpdateYaml(string yaml)
+        {
+
+        }
         public async Task StartBuild(BuildRunRequest request)
         {
             try
             {
-                // TODO: What if current build already exists
+                UpdateYaml(request.Yaml);
 
                 ReportStatus($"[{request.Build}] Staring");
 
@@ -71,7 +76,7 @@ namespace BuildManager
                 var containerHelper = new ContainerHelper();
 
                 // Pull the image
-                await containerHelper.PullImage(request.Image, ReportStatus, ReportError, ReportStatus);
+                await containerHelper.PullImage(request.TestContainerImage, ReportStatus, ReportError, ReportStatus);
 
                 List<RunTest> tests = new List<RunTest>();
 
@@ -85,7 +90,7 @@ namespace BuildManager
                     await containerHelper.RemoveContainer(res.ID);
                 }
 
-                CreateContainerResponse createContainerResponse = await containerHelper.CreateContainer(request.Image, request.Build, new List<string> { "ListTests" });
+                CreateContainerResponse createContainerResponse = await containerHelper.CreateContainer(request.TestContainerImage, request.Build, new List<string> { "ListTests" });
 
                 await containerHelper.StartContainer(createContainerResponse.ID);
 
@@ -235,7 +240,7 @@ namespace BuildManager
                 QueueNames.TestResponse(request.Build)
             };
 
-            return new RunBuild { Build = request.Build, Commands = commands, ContainerImage = request.Image };
+            return new RunBuild { Build = request.Build, Commands = commands, Yaml = request.Yaml };
         }
 
         public IDisposable SubscribeTestResult(IObserver<TestExecutionResult> observer)
