@@ -1,4 +1,5 @@
 ﻿using BuildManager;
+using Common;
 using NUnit.Framework;
 
 namespace BuildManagerTests
@@ -26,6 +27,16 @@ namespace BuildManagerTests
             Assert.IsNotNull(res);
         }
 
+        [Test]
+        public void CanFindImage()
+        {
+            ComposeFileParser sut = new ComposeFileParser(yaml);
+
+            var res = sut.GetTesterImageName();
+
+            Assert.AreEqual("shawnseabrook/build:140", res);
+        }
+
         [TestCase(@"""tester.exe""")]
         [TestCase(@"[""tester.exe""]")]
         public void CanFindCommandNode(string cmd)
@@ -33,8 +44,6 @@ namespace BuildManagerTests
             ComposeFileParser sut = new ComposeFileParser(string.Format(yamlCommand, cmd));
 
             var res = sut.CommandNode;
-
-            
 
             Assert.IsNotNull(res);
         }

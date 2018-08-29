@@ -3,10 +3,12 @@ using HiQ.Interfaces;
 using InContainerShared;
 using log4net.Config;
 using MessageModels;
+using NUnit.Engine;
 using System;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace TestRunner
 {
@@ -26,6 +28,14 @@ namespace TestRunner
             string queueUsername = System.Environment.GetEnvironmentVariable("TESTER_USERNAME");
             string queuePassword = System.Environment.GetEnvironmentVariable("TESTER_PASSWORD");
             string directoryToSearch = System.Environment.GetEnvironmentVariable("TESTER_SEARCHDIR");
+
+            string listTests = System.Environment.GetEnvironmentVariable("TESTER_LISTTESTS");
+
+            if (!string.IsNullOrEmpty(listTests))
+            {
+                ListTests(directoryToSearch);
+                return;
+            }
 
             log4net.GlobalContext.Properties["LogName"] = $"{instanceName}.log";
 
@@ -68,6 +78,25 @@ namespace TestRunner
             Console.WriteLine("Listening ...");
         }
 
+        private static void ListTests(string directoryToSearch)
+        {
+            using (ITestEngine testEngine = TestEngineActivator.CreateInstance())
+            {
+                var files = Directory.GetFiles(directoryToSearch, "*.dll", SearchOption.AllDirectories);
+                TestPackage package = new TestPackage(files);
+
+                using (ITestRunner runner = testEngine.GetRunner(package))
+                {
+                    var testSuites = runner.Explore(TestFilter.Empty);
+                    var testCases = testSuites.SelectNodes("//test-case");
+
+                    foreach (XmlNode n in testCases)
+                    {
+                        Console.WriteLine(n.Attributes["fullname"].Value);
+                    }
+                }
+            }
+        }
         private static void ShutDown()
         {
             receiver.Dispose();

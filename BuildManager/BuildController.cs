@@ -1,5 +1,6 @@
 ﻿using Common;
 using Model;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BuildManager
@@ -20,7 +21,7 @@ namespace BuildManager
         }
         public async Task KickOffBuild(BuildRunRequest request, ITestRunObserver observer = null)
         {
-            using (var processor = new BuildProcessor(_host, _vHost, _username, _password, @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish", @"C:\Users\shawn\source\repos\TestNUnitRunner\Publish\SystemUnderTest", "shawnseabrook", "myimage", request.Build))
+            using (var processor = new BuildProcessor(_host, _vHost, _username, _password))
             {
                 ToConsoleObserver consoleObserver = new ToConsoleObserver();
                 ToLogObserver logObserver = new ToLogObserver("BuildManager");

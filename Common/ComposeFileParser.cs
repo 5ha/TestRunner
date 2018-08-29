@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
 
-namespace BuildManager
+namespace Common
 {
     public class ComposeFileParser
     {
@@ -34,6 +34,11 @@ namespace BuildManager
                 _yaml.Save(tw);
             }
             return s.ToString();
+        }
+
+        public string GetTesterImageName()
+        {
+            return ((YamlScalarNode)ImageNode).Value;
         }
 
         public string GetTesterLocation()
@@ -114,6 +119,25 @@ namespace BuildManager
                 }
 
                 return _commandNode;
+            }
+        }
+
+        private YamlNode _imageNode;
+        public YamlNode ImageNode
+        {
+            get
+            {
+                if (_imageNode == null)
+                {
+                    _imageNode = GetNode<YamlNode>("image", TesterNode);
+                }
+
+                if(_imageNode == null)
+                {
+                    throw new InvalidDataException("Cannot find node 'services/tester/image' in YAML document");
+                }
+
+                return _imageNode;
             }
         }
 

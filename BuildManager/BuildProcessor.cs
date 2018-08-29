@@ -1,6 +1,7 @@
 ﻿using BuildManager.Model;
 using Common;
 using Docker.DotNet.Models;
+using DockerComposeUtils;
 using DockerUtils;
 using HiQ.Builders;
 using HiQ.Interfaces;
@@ -19,11 +20,6 @@ namespace BuildManager
         private readonly string _vHost;
         private readonly string _username;
         private readonly string _password;
-        private readonly string _pathToBuildFolder;
-        private readonly string _testSearchDirectory;
-        private readonly string _repository;
-        private readonly string _image;
-        private readonly string _build;
         private TestResultMonitor _testResultMonitor;
         private StatusMessageMonitor _statusMessageMonitor;
         private Dictionary<string, string> _expectedTests;
@@ -39,7 +35,7 @@ namespace BuildManager
         NunitParser _parser;
 
 
-        public BuildProcessor(string host, string vHost, string username, string password, string pathToBuildFolder, string testSearchDirectory, string repository, string image, string build)
+        public BuildProcessor(string host, string vHost, string username, string password)
         {
             _testResultMonitor = new TestResultMonitor();
             _statusMessageMonitor = new StatusMessageMonitor();
@@ -48,53 +44,39 @@ namespace BuildManager
             _vHost = vHost;
             _username = username;
             _password = password;
-            _pathToBuildFolder = pathToBuildFolder;
-            _testSearchDirectory = testSearchDirectory;
-            _repository = repository;
-            _image = image;
-            _build = build;
             _cancellationTokenSource = new CancellationTokenSource();
             _expectedTests = new Dictionary<string, string>();
 
             _parser = new NunitParser();
         }
 
-
-        private void UpdateYaml(string yaml)
-        {
-
-        }
         public async Task StartBuild(BuildRunRequest request)
         {
             try
             {
-                UpdateYaml(request.Yaml);
-
                 ReportStatus($"[{request.Build}] Staring");
 
-                
-                var containerHelper = new ContainerHelper();
+                string testOutput;
+                ComposeFileParser composeFileParser = new ComposeFileParser(request.Yaml);
+                string imageName = composeFileParser.GetTesterImageName();
+                string testCommand = composeFileParser.GetTesterLocation();
 
-                // Pull the image
-                await containerHelper.PullImage(request.TestContainerImage, ReportStatus, ReportError, ReportStatus);
+                using (DockerWrapper docker = new DockerWrapper())
+                {
+                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                    cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
+
+                    Dictionary<string, string> environmentVariable = new Dictionary<string, string>
+                    {
+                        { "TESTER_LISTTESTS", "true"}
+                    };
+
+                    testOutput = await docker.Run(imageName, environmentVariables: environmentVariable, 
+                        command: testCommand, cancellationToken: cancellationTokenSource.Token);
+                }
 
                 List<RunTest> tests = new List<RunTest>();
 
-                // Get the tests from the docker image
-
-                string containerName = $"{request.Build}";
-
-                if (containerHelper.ContainerExists(containerName))
-                {
-                    var res = containerHelper.FindContainer(containerName);
-                    await containerHelper.RemoveContainer(res.ID);
-                }
-
-                CreateContainerResponse createContainerResponse = await containerHelper.CreateContainer(request.TestContainerImage, request.Build, new List<string> { "ListTests" });
-
-                await containerHelper.StartContainer(createContainerResponse.ID);
-
-                string testOutput = await containerHelper.AttachContainer(createContainerResponse.ID);
                 string[] testNames = testOutput.Split('\n');
 
                 foreach(string testName in testNames)

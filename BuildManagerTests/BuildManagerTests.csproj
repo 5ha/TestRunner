@@ -44,6 +44,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +54,10 @@
     <ProjectReference Include="..\BuildManager\BuildManager.csproj">
       <Project>{44eda651-93d9-4dc2-850c-094c089cc5d0}</Project>
       <Name>BuildManager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{0DE4D48D-F841-4D78-92C2-47A5DE68504E}</Project>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -107,7 +107,6 @@
   <ItemGroup>
     <Compile Include="BuildController.cs" />
     <Compile Include="BuildProcessor.cs" />
-    <Compile Include="ComposeFileParser.cs" />
     <Compile Include="NunitParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -120,6 +119,10 @@
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{0de4d48d-f841-4d78-92c2-47a5de68504e}</Project>
       <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DockerComposeUtils\DockerComposeUtils.csproj">
+      <Project>{7EB9B9AF-6A5B-4493-A929-8967B466FCDE}</Project>
+      <Name>DockerComposeUtils</Name>
     </ProjectReference>
     <ProjectReference Include="..\DockerUtils\DockerUtils.csproj">
       <Project>{23BFBE6B-BD87-45F0-A939-0E9FA30B1783}</Project>
