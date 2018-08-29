@@ -50,16 +50,40 @@ namespace BuildManager
             _parser = new NunitParser();
         }
 
+        private RunBuild CreateBuildInstruction(BuildRunRequest request)
+        {
+            ComposeFileParser composeFileParser = new ComposeFileParser(request.Yaml);
+
+            RunBuild runBuild = new RunBuild
+            {
+                Yaml = request.Yaml,
+                Build = request.Build,
+                Image = composeFileParser.GetTesterImageName(),
+                Command = composeFileParser.GetTesterLocation(),
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+
+                    { "TESTER_SERVER" , _host},
+                    { "TESTER_VHOST" , _vHost},
+                    { "TESTER_USERNAME" , _username},
+                    { "TESTER_PASSWORD" , _password},
+                    { "TESTER_REQUEST_QUEUE" , $"{request.Build}_request" },
+                    { "TESTER_RESPONSE_QUEUE" , $"{request.Build}_response"}
+                }
+            };
+
+            return runBuild;
+        }
+
         public async Task StartBuild(BuildRunRequest request)
         {
             try
             {
                 ReportStatus($"[{request.Build}] Staring");
 
+                RunBuild buildInstruction = CreateBuildInstruction(request);
+
                 string testOutput;
-                ComposeFileParser composeFileParser = new ComposeFileParser(request.Yaml);
-                string imageName = composeFileParser.GetTesterImageName();
-                string testCommand = composeFileParser.GetTesterLocation();
 
                 using (DockerWrapper docker = new DockerWrapper())
                 {
@@ -71,8 +95,8 @@ namespace BuildManager
                         { "TESTER_LISTTESTS", "true"}
                     };
 
-                    testOutput = await docker.Run(imageName, environmentVariables: environmentVariable, 
-                        command: testCommand, cancellationToken: cancellationTokenSource.Token);
+                    testOutput = await docker.Run(buildInstruction.Image, environmentVariables: buildInstruction.EnvironmentVariables, 
+                        command: buildInstruction.Command, cancellationToken: cancellationTokenSource.Token);
                 }
 
                 List<RunTest> tests = new List<RunTest>();
@@ -108,7 +132,7 @@ namespace BuildManager
                 // Add the build instruction to the queue
                 ReportStatus($"[{request.Build}] Sending Build Instruction ...");
                 buildInstructionSender = ConfigureSender(QueueNames.Build());
-                buildInstructionSender.Send(CreateBuildInstruction(request));
+                buildInstructionSender.Send(buildInstruction);
                 ReportStatus($"[{request.Build}] Build Instruction sent.");
 
                 // Subscribe to the test result queue until all the tests have been completed (notifying subscribers)
@@ -211,18 +235,6 @@ namespace BuildManager
                 .IReceiveForever()
                 .Build();
             return receiver;
-        }
-
-        private RunBuild CreateBuildInstruction(BuildRunRequest request)
-        {
-            List<string> commands = new List<string>
-            {
-                "RunTests", 
-                QueueNames.TestRequest(request.Build),
-                QueueNames.TestResponse(request.Build)
-            };
-
-            return new RunBuild { Build = request.Build, Commands = commands, Yaml = request.Yaml };
         }
 
         public IDisposable SubscribeTestResult(IObserver<TestExecutionResult> observer)

@@ -27,7 +27,8 @@ namespace TestRunner
             string queueVhost = System.Environment.GetEnvironmentVariable("TESTER_VHOST");
             string queueUsername = System.Environment.GetEnvironmentVariable("TESTER_USERNAME");
             string queuePassword = System.Environment.GetEnvironmentVariable("TESTER_PASSWORD");
-            string directoryToSearch = System.Environment.GetEnvironmentVariable("TESTER_SEARCHDIR");
+
+            string directoryToSearch = ConfigurationManager.AppSettings["directoryToSearch"];
 
             string listTests = System.Environment.GetEnvironmentVariable("TESTER_LISTTESTS");
 

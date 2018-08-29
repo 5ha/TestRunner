@@ -100,16 +100,8 @@ namespace SocketClient
             BuildRunRequest request = new BuildRunRequest
             {
                 Build = build,
-                TestContainerImage = image,
                 Yaml = yaml
             };
-
-            //bool sleep = true;
-            //while (sleep)
-            //{
-            //    Thread.Sleep(1000);
-            //}
-
 
             try
             {

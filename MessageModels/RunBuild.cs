@@ -9,7 +9,11 @@ namespace MessageModels
 
         public string Build { get; set; }
 
-        public List<string> Commands { get; set; }
+        public string Image { get; set; }
+
+        public string Command { get; set; }
+
+        public Dictionary<string, string> EnvironmentVariables { get; set; }
 
         public override bool Equals(Object obj)
         {
