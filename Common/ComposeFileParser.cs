@@ -26,6 +26,22 @@ namespace Common
             }
         }
 
+        public void AddEnvironmentVariables(Dictionary<string, string> environmentVariables)
+        {
+            var environmentNode = GetNode<YamlSequenceNode>("environment", TesterNode);
+
+            if (environmentNode == null)
+            {
+                environmentNode = new YamlSequenceNode();
+                TesterNode.Add(new YamlScalarNode("environment"), environmentNode);
+            }
+
+            foreach(string key in environmentVariables.Keys)
+            {
+                environmentNode.Add(new YamlScalarNode($"{key}={environmentVariables[key]}"));
+            }
+        }
+
         public string Save()
         {
             StringBuilder s = new StringBuilder();
@@ -146,9 +162,15 @@ namespace Common
             if (ctx == null)
                 ctx = (YamlMappingNode)_yaml.Documents[0].RootNode;
 
-            T n = ctx.Children[new YamlScalarNode(tag)] as T;
-
-            return n;
+            try
+            {
+                var n = ctx.Children[new YamlScalarNode(tag)];
+                return n as T;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

@@ -135,6 +135,11 @@ namespace ContainerManager
             Builds.Remove(build);
         }
 
+        private string EnhanceYaml(RunBuild instruction)
+        {
+            return "";
+        }
+
         private async Task<(string stdOut, string stdErr)> RunProcess(RunBuild build, Action<(string status, string warning, string error)> notify)
         {
             ContainerHelper helper = new ContainerHelper();

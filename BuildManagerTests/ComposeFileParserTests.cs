@@ -1,6 +1,7 @@
 ﻿using BuildManager;
 using Common;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace BuildManagerTests
 {
@@ -62,6 +63,24 @@ namespace BuildManagerTests
             var res = sut.GetTesterLocation();
            
             Assert.AreEqual(expected, res);
+        }
+
+        [Test]
+        public void CanAddEnvironmentVariables()
+        {
+            ComposeFileParser sut = new ComposeFileParser(yaml);
+
+            var variables = new Dictionary<string, string>
+            {
+                {"var1", "val1" },
+                {"var2", "val2"}
+            };
+
+            sut.AddEnvironmentVariables(variables);
+
+            var res = sut.Save();
+
+            Assert.IsTrue(res.IndexOf("var2") > -1);
         }
 
         private string yaml = @"version: ""3""
