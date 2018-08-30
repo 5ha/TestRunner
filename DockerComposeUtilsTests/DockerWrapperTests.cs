@@ -34,5 +34,18 @@ namespace DockerComposeUtilsTests
 
             Assert.IsFalse(string.IsNullOrEmpty(res));
         }
+
+        [Test]
+        public async Task CanRunTester()
+        {
+            Dictionary<string, string> environmentVariable = new Dictionary<string, string>
+                    {
+                        { "TESTER_LISTTESTS", "true"}
+                    };
+
+            string res = await _sut.Run("shawnseabrook/build:144", environmentVariable, "RunTests.exe");
+
+            Console.WriteLine(res);
+        }
     }
 }

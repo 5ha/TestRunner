@@ -1,4 +1,5 @@
-﻿using Docker.DotNet.Models;
+﻿using Common;
+using Docker.DotNet.Models;
 using DockerComposeUtils;
 using DockerUtils;
 using HiQ.Builders;
@@ -137,7 +138,16 @@ namespace ContainerManager
 
         private string EnhanceYaml(RunBuild instruction)
         {
-            return "";
+            ComposeFileParser parser = new ComposeFileParser(instruction.Yaml);
+
+            if (instruction.EnvironmentVariables == null)
+                instruction.EnvironmentVariables = new Dictionary<string, string>();
+
+            instruction.EnvironmentVariables.Add("TESTER_INSTANCE", _instanceName);
+
+            parser.AddEnvironmentVariables(instruction.EnvironmentVariables);
+
+            return parser.Save();
         }
 
         private async Task<(string stdOut, string stdErr)> RunProcess(RunBuild build, Action<(string status, string warning, string error)> notify)
@@ -151,9 +161,9 @@ namespace ContainerManager
             {
                 using (ComposeWrapper compose = new ComposeWrapper(_instanceName, ConfigurationManager.AppSettings["yamlBasePath"], TimeSpan.FromMinutes(int.Parse(ConfigurationManager.AppSettings["composeExecutionTimeoutMinutes"]))))
                 {
-                    await compose.RunCompose(build.Yaml);
+                    string enhancedYaml = EnhanceYaml(build);
+                    await compose.RunCompose(enhancedYaml);
                 }
-
 
                 notify(($"{_instanceName} Completed", null, null));
             }

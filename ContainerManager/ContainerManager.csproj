@@ -126,6 +126,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{0DE4D48D-F841-4D78-92C2-47A5DE68504E}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DockerComposeUtils\DockerComposeUtils.csproj">
       <Project>{7EB9B9AF-6A5B-4493-A929-8967B466FCDE}</Project>
       <Name>DockerComposeUtils</Name>

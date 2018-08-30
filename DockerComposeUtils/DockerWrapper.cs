@@ -24,20 +24,31 @@ namespace DockerComposeUtils
             StringBuilder result = new StringBuilder();
             StringBuilder error = new StringBuilder();
 
-            ExecutionInput input = new ExecutionInput($"run --rm {imageName} {command}");
+            StringBuilder s = new StringBuilder();
+
+            foreach (var key in environmentVariables.Keys)
+            {
+                s.Append($" -e {key}={environmentVariables[key]} ");
+            }
+
+            ExecutionInput input = new ExecutionInput($"run --rm {s.ToString()} {imageName} {command}");
+
+
+
+            //input.StandardInput = s.ToString();
+
 
             var handler = new BufferHandler(stdOutLine => result.Append(stdOutLine), stdErrLine => error.Append(stdErrLine));
 
-            if (environmentVariables != null)
-            {
-                input.EnvironmentVariables = environmentVariables;
-            }
-            await _cliDocker.ExecuteAsync(input, cancellationToken, handler);
+            //if (environmentVariables != null)
+            //{
+            //    input.EnvironmentVariables = environmentVariables;
+            //}
+            ExecutionOutput output = await _cliDocker.ExecuteAsync(input, cancellationToken, handler);
 
-            string errorString = error.ToString();
-            if (!string.IsNullOrEmpty(errorString))
+            if (output.ExitCode != 0)
             {
-                throw new CliException("Could not run image",result.ToString(),errorString);
+                throw new CliException("Could not run image",result.ToString(), error.ToString());
             }
             return result.ToString();
         }

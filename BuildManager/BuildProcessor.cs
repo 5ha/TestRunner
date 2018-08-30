@@ -88,14 +88,14 @@ namespace BuildManager
                 using (DockerWrapper docker = new DockerWrapper())
                 {
                     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                    cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
+                    //cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
 
                     Dictionary<string, string> environmentVariable = new Dictionary<string, string>
                     {
                         { "TESTER_LISTTESTS", "true"}
                     };
 
-                    testOutput = await docker.Run(buildInstruction.Image, environmentVariables: buildInstruction.EnvironmentVariables, 
+                    testOutput = await docker.Run(buildInstruction.Image, environmentVariables: environmentVariable, 
                         command: buildInstruction.Command, cancellationToken: cancellationTokenSource.Token);
                 }
 
