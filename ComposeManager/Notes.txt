@@ -11,7 +11,7 @@ net user ComposeManager Psgd53$wfegt£ /add
 icacls "C:\Users\shawn\source\repos\TestNUnitRunner\Publish\ComposeManager" /grant ComposeManager:(OI)(CI)WRX /t
 
 // Create the service
-sc create ComposeManager binPath= "C:\Users\shawn\source\repos\TestNUnitRunner\Publish\ComposeManager\ComposeManager.exe" obj= "LAPRAT\ComposeManager" password= "Psgd53$wfegt£"
+sc create ComposeManager binPath= "C:\Users\shawn\source\repos\TestNUnitRunner\Publish\ComposeManager\ComposeManager.exe" obj= "LAPRAT\ComposeManager" password= "Psgd53$wfegt£" start= auto 
 
 // Set the group polist to logon as a service
 // Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Log on as a service
