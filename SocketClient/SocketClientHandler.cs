@@ -48,8 +48,6 @@ namespace SocketClient
                 {
                     string s = byteBuffer.ToString(Encoding.UTF8);
 
-                    SocketClientHandler.OutputMessage("RECEIVED RAW: {s}");
-
                     _log.Info($"RECEIVED RAW: {s}");
                     var obj = JsonConvert.DeserializeObject(s, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 

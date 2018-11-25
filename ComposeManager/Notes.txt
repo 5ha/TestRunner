@@ -1,0 +1,29 @@
+﻿// List users
+net user
+
+// Create the user
+net user ComposeManager Psgd53$wfegt£ /add
+
+// Add the user to the LocalService group
+// net localgroup LocalService ComposeManager /add
+
+// Give the user permission to access the application files
+icacls "C:\Users\shawn\source\repos\TestNUnitRunner\Publish\ComposeManager" /grant ComposeManager:(OI)(CI)WRX /t
+
+// Create the service
+sc create ComposeManager binPath= "C:\Users\shawn\source\repos\TestNUnitRunner\Publish\ComposeManager\ComposeManager.exe" obj= "LAPRAT\ComposeManager" password= "Psgd53$wfegt£"
+
+// Set the group polist to logon as a service
+// Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Log on as a service
+
+// Start the service
+sc start ComposeManager
+
+// Check the status of the service
+sc query ComposeManager
+
+// Stop the service
+sc stop ComposeManager
+
+// Uninstall the service
+sc delete ComposeManager
