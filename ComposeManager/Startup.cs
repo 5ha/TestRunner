@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ComposeManager.Config;
+using ComposeManager.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ComposeManager
 {
@@ -25,6 +21,12 @@ namespace ComposeManager
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.Configure<AppSettings>(Configuration);
+            services.Configure<QueueSettings>(Configuration.GetSection("QueueSettings"));
+
+            services.AddTransient<IJobRunner, JobRunner>();
+            services.AddTransient<IJobRunnerService, JobRunnerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -159,7 +159,8 @@ namespace ContainerManager
 
             try
             {
-                using (ComposeWrapper compose = new ComposeWrapper(_instanceName, ConfigurationManager.AppSettings["yamlBasePath"], TimeSpan.FromMinutes(int.Parse(ConfigurationManager.AppSettings["composeExecutionTimeoutMinutes"]))))
+                using (ComposeWrapper compose = new ComposeWrapper(_instanceName, ConfigurationManager.AppSettings["yamlBasePath"], 
+                    TimeSpan.FromMinutes(int.Parse(ConfigurationManager.AppSettings["composeExecutionTimeoutMinutes"]))))
                 {
                     string enhancedYaml = EnhanceYaml(build);
                     await compose.RunCompose(enhancedYaml);
