@@ -1,43 +1,31 @@
 ﻿using ComposeManager.Services;
+using JobModels;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace ComposeManager.Controllers
 {
     public class ManagerController : ControllerBase
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IJobRunnerService _jobRunnerService;
 
-        public ManagerController(IServiceProvider serviceProvider)
+        public ManagerController(IJobRunnerService jobRunnerService)
         {
-            _serviceProvider = serviceProvider;
+            _jobRunnerService = jobRunnerService;
         }
+
         [HttpGet("/health")]
         public ActionResult<string> Index()
         {
-            var runner = (IJobRunner)_serviceProvider.GetService(typeof(IJobRunner));
-
-            return runner.GetType().FullName;
             return "SUCCESS";
+
         }
 
         // Start a job
-        [HttpGet("/start")]
-        public ActionResult<string> StartJob()
+        [HttpPost("/start")]
+        public ActionResult<string> StartJob([FromBody]JobDescription jobDescription)
         {
-            // Kill all current processes
-
-            // Start the new job
-
-            return "";
-        }
-
-        
-        [HttpGet("/inprogress")]
-        public ActionResult<bool> inprogress()
-        {
-            // return whether a job is running
-            return true;
+            _jobRunnerService.RunJob(jobDescription);
+            return $"STARTED: {jobDescription.Build}";
         }
     }
 }

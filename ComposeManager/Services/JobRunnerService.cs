@@ -6,7 +6,9 @@ using System;
 namespace ComposeManager.Services
 {
     public interface IJobRunnerService
-    {}
+    {
+        void RunJob(JobDescription jobDescription);
+    }
 
     public class JobRunnerService : IJobRunnerService
     {

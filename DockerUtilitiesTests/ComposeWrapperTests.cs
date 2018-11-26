@@ -1,4 +1,5 @@
-﻿using DockerUtilities;
+﻿using CliWrap.Exceptions;
+using DockerUtilities;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
@@ -41,7 +42,26 @@ services:
   server:
     image: selenium/standalone-chrome
 ";
-            await _sut.RunCompose(yaml);
+            try
+            {
+                await _sut.RunCompose(yaml);
+            } catch(ExitCodeValidationException e)
+            {
+                Console.WriteLine("=================== STANDARD OUTPUT ======================");
+                Console.WriteLine(e.ExecutionResult.StandardOutput);
+                Console.WriteLine("=================== STANDARD ERROR ======================");
+                Console.WriteLine(e.ExecutionResult.StandardError);
+                Console.WriteLine("=================== ============== ======================");
+
+                throw;
+            } catch(StandardErrorValidationException e)
+            {
+                Console.WriteLine(e.ExecutionResult.StandardOutput);
+                Console.WriteLine("=================== STANDARD ERROR ======================");
+                Console.WriteLine(e.ExecutionResult.StandardError);
+                Console.WriteLine("=================== ============== ======================");
+                throw;
+            }
 
         }
     }

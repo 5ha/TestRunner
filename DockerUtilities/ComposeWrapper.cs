@@ -1,4 +1,5 @@
 ﻿using CliWrap;
+using CliWrap.Models;
 using System;
 using System.IO;
 using System.Threading;
@@ -8,19 +9,22 @@ namespace DockerUtilities
 {
     public class ComposeWrapper
     {
-        private Cli _cliCompose;
-        private Cli _cliDocker;
+        //private Cli _cliCompose;
+        //private Cli _cliDocker;
         private readonly string _projectName;
         private string _executionPath;
         private CancellationTokenSource _cancellationTokenSource;
+
+        private readonly string DOCKER_COMPOSE = "docker-compose";
+        private readonly string DOCKER = "docker";
 
         public ComposeWrapper(string projectName, string basePath, TimeSpan maxExecutionTime)
         {
             _cancellationTokenSource = new CancellationTokenSource(maxExecutionTime);
             _executionPath = Path.Combine(basePath, projectName);
             Directory.CreateDirectory(_executionPath);
-            _cliCompose = new Cli("docker-compose");
-            _cliDocker = new Cli("docker");
+            //_cliCompose = new Cli("docker-compose");
+            // = new Cli("docker");
             _projectName = projectName;
         }
 
@@ -28,7 +32,7 @@ namespace DockerUtilities
         {
             string version;
 
-            var output = _cliCompose
+            var output = new Cli(DOCKER_COMPOSE)
                 .SetArguments("-v")
                 .EnableStandardErrorValidation()
                 .EnableExitCodeValidation()
@@ -45,12 +49,12 @@ namespace DockerUtilities
 
             try
             {
-                await _cliDocker
+                await new Cli(DOCKER)
                     .SetArguments($@"events --filter com.docker.compose.project={_projectName} --filter event=die")
                     .SetCancellationToken(linkedTokens.Token)
                     .SetStandardOutputCallback(s => monitorTokenSource.Cancel())// We received the info we were waiting for
                     .SetStandardErrorCallback(s => monitorTokenSource.Cancel())
-                    .EnableStandardErrorValidation()
+                    //.EnableStandardErrorValidation()
                     .EnableExitCodeValidation()
                     .ExecuteAsync();
             }
@@ -68,23 +72,51 @@ namespace DockerUtilities
         {
             File.WriteAllText(Path.Combine(_executionPath, "docker-compose.yml"), yaml);
 
-            _cliCompose
-                .SetStandardInput($@"-p {_projectName} -f {_executionPath}\docker-compose.yml up")
-                .ExecuteAndForget();
+            var dockerUp = Task.Run(async() =>
+             {
+                 await new Cli(DOCKER_COMPOSE)
+                        .SetWorkingDirectory(_executionPath)
+                        .SetArguments($@"up")
+                        //.EnableStandardErrorValidation()
+                        .EnableExitCodeValidation()
+                        .ExecuteAsync();
+             });
+
 
             await WaitForContainerToDie();
 
-            ComposeDown();
+            await ComposeDown();
         }
 
-        private void ComposeDown()
+        public async Task ComposeDown()
         {
-            _cliCompose
-                .SetStandardInput($@"-p {_projectName} -f {_executionPath}\docker-compose.yml down")
+            await
+            new Cli(DOCKER_COMPOSE)
+                .SetWorkingDirectory(_executionPath)
+                .SetArguments($@"kill")
                 .SetCancellationToken(_cancellationTokenSource.Token)
-                .EnableStandardErrorValidation()
+                .EnableStandardErrorValidation(false)
                 .EnableExitCodeValidation()
-                .Execute();
+                .ExecuteAsync();
+
+            await
+            new Cli(DOCKER_COMPOSE)
+                .SetWorkingDirectory(_executionPath)
+                .SetArguments($@"down")
+                .SetCancellationToken(_cancellationTokenSource.Token)
+                .EnableStandardErrorValidation(false)
+                .EnableExitCodeValidation()
+                .ExecuteAsync();
+
+            File.Delete(YamlFilename);
+        }
+
+        private string YamlFilename
+        {
+            get
+            {
+                return Path.Combine(_executionPath, "docker-compose.yml");
+            }
         }
     }
 }

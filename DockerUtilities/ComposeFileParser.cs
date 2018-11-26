@@ -45,7 +45,7 @@ namespace DockerUtilities
             StringBuilder s = new StringBuilder();
             using (TextWriter tw = new StringWriter(s))
             {
-                _yaml.Save(tw);
+                _yaml.Save(tw, false);
             }
             return s.ToString();
         }

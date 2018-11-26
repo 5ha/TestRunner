@@ -8,19 +8,12 @@ namespace DockerUtilities
 {
     public class DockerWrapper
     {
-        private Cli _cliDocker;
-
-        public DockerWrapper()
-        {
-            _cliDocker = new Cli("docker");
-        }
-
         public async Task<string> Run(string imageName, Dictionary<string, string> environmentVariables = null, string command = null, 
             CancellationToken cancellationToken = default(CancellationToken))
         {
             StringBuilder result = new StringBuilder();
 
-            await _cliDocker
+            await new Cli("docker")
                 .SetArguments($"run --rm {GetEnvironmentVariables(environmentVariables)} {imageName} {command}")
                 .SetStandardOutputCallback(stdOutLine => result.Append(stdOutLine))
                 .SetCancellationToken(cancellationToken)
