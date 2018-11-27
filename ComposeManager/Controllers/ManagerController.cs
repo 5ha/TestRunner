@@ -2,6 +2,7 @@
 using JobModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace ComposeManager.Controllers
 {
@@ -18,16 +19,15 @@ namespace ComposeManager.Controllers
         public ActionResult<string> Index()
         {
             return "SUCCESS";
-
         }
 
         // Start a job
         [HttpPost("/start")]
-        public ActionResult<string> StartJob([FromBody]JobDescription jobDescription)
+        public async Task<ActionResult<string>> StartJob([FromBody]JobDescription jobDescription)
         {
             string project = Guid.NewGuid().ToString("N");
 
-            _jobRunner.RunJob(jobDescription, $"{project}");
+            await _jobRunner.RunJob(jobDescription, $"{project}");
 
             return $"STARTED: {jobDescription.Build}";
         }

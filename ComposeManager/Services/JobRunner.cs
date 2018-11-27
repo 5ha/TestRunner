@@ -11,7 +11,7 @@ namespace ComposeManager.Services
 {
     public interface IJobRunner
     {
-        void RunJob(JobDescription jobDescription, string instanceName);
+        Task RunJob(JobDescription jobDescription, string instanceName);
     }
     public class JobRunner : IJobRunner
     {
@@ -26,14 +26,14 @@ namespace ComposeManager.Services
             _composeWrapper = composeWrapper;
         }
 
-        public void RunJob(JobDescription jobDescription, string instanceName)
+        public Task RunJob(JobDescription jobDescription, string instanceName)
         {
             _logger.LogInformation("Running job {0}", jobDescription.Build);
 
             string enhancedYaml = EnhanceYaml(jobDescription, instanceName);
 
-            _composeWrapper.RunCompose(instanceName, _appSettings.Value.YamlBasePath,
-                                            TimeSpan.FromMinutes(_appSettings.Value.MaxComposeExecutionTimeInMinutes), enhancedYaml).ConfigureAwait(false);
+            return _composeWrapper.RunCompose(instanceName, _appSettings.Value.YamlBasePath,
+                                            TimeSpan.FromMinutes(_appSettings.Value.MaxComposeExecutionTimeInMinutes), enhancedYaml);
         }
 
         private string EnhanceYaml(JobDescription jobDescription, string instanceName)

@@ -1,5 +1,6 @@
 ﻿using CliWrap;
 using CliWrap.Exceptions;
+using CliWrap.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Globalization;
@@ -15,7 +16,7 @@ namespace DockerUtilities
         Task RunCompose(string projectName, string basePath, TimeSpan maxExecutionTime, string yaml);
     }
 
-    public class ComposeWrapper : IComposeWrapper, IDisposable
+    public class ComposeWrapper : IComposeWrapper//, IDisposable
     {
         private string _projectName;
         private string _executionPath;
@@ -52,55 +53,15 @@ namespace DockerUtilities
 
             File.WriteAllText(Path.Combine(_executionPath, "docker-compose.yml"), yaml);
 
-            var composeResult = Task<string>.Run(async() =>
-             {
-                 StringBuilder s = new StringBuilder();
-
-                 Action<string> appendLine = (res) => s.AppendLine(res);
-
-                 await new Cli(DOCKER_COMPOSE)
-                        .SetWorkingDirectory(_executionPath)
-                        .SetArguments($@"up --force-recreate")
-                        .EnableStandardErrorValidation(false)
-                        .EnableExitCodeValidation()
-                        .SetStandardOutputCallback(appendLine)
-                        .SetStandardErrorCallback(appendLine)
-                        //.SetStandardOutputEncoding(Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage))
-                        .SetStandardOutputEncoding(Encoding.GetEncoding(437))
-                        .ExecuteAsync();
-
-                 return s.ToString();
-                 
-             }, _cancellationTokenSource.Token);
-
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            composeResult.ContinueWith((task, log) => {
-                ILogger<ComposeWrapper> logger = log as ILogger<ComposeWrapper>;
-                try
-                {
-                    logger.LogDebug("'docker-compose up' completed with output: {0}", task.Result);
-                }
-                catch (AggregateException e)
-                {
-                    foreach (var inner in task.Exception.Flatten().InnerExceptions)
-                    {
-                        if (inner is ExitCodeValidationException ve)
-                        {
-                            logger.LogError("Compose Error: {0}", ve.ExecutionResult.StandardError);
-                        } else
-                        {
-                            logger.LogError("Compose Error: {0}", e.Message);
-                        }
-                    }
-                }
-            }, _logger, _cancellationTokenSource.Token).ConfigureAwait(false);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-
-
-            await WaitForContainerToDie();
+            Task.WaitAny(Compose(), WaitForContainerToDie());
 
             await ComposeDown();
 
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            
             _logger.LogInformation("[{0}] Compose Complete", projectName);
         }
 
@@ -110,6 +71,30 @@ namespace DockerUtilities
             _executionPath = Path.Combine(basePath, projectName);
             Directory.CreateDirectory(_executionPath);
             _projectName = projectName;
+        }
+
+        private async Task Compose()
+        {
+            ExecutionResult result = null;
+
+            try
+            {
+                await new Cli(DOCKER_COMPOSE)
+                       .SetWorkingDirectory(_executionPath)
+                       .SetCancellationToken(_cancellationTokenSource.Token)
+                       .SetArguments($@"up --force-recreate")
+                       .EnableStandardErrorValidation(false)
+                       .EnableExitCodeValidation()
+                       //.SetStandardOutputEncoding(Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage))
+                       .SetStandardOutputEncoding(Encoding.GetEncoding(437))
+                       .ExecuteAsync();
+            }
+            catch (ExitCodeValidationException ve)
+            {
+                _logger.LogError("Compose Error: {0}", ve.ExecutionResult.StandardError);
+            }
+
+            _logger.LogDebug("'docker-compose up' completed with output: {0}", result.StandardOutput);
         }
 
         private async Task WaitForContainerToDie()
@@ -141,6 +126,7 @@ namespace DockerUtilities
                 // Only throw the cancellation exception if the global token was cancelled
                 if (_cancellationTokenSource.IsCancellationRequested)
                 {
+                    _logger.LogDebug("[{0}] Cancellation token cancelled", _projectName);
                     throw;
                 }
             }
