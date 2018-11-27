@@ -1,5 +1,7 @@
 ﻿using CliWrap.Exceptions;
 using DockerUtilities;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -12,11 +14,13 @@ namespace DockerUtilitiesTests
     public class DockerWrapperTests
     {
         private DockerWrapper _sut;
+        Mock<ILogger<DockerWrapper>> _logger;
 
         [SetUp]
         public void SetUp()
         {
-            _sut = new DockerWrapper();
+            _logger = new Mock<ILogger<DockerWrapper>>();
+            _sut = new DockerWrapper(_logger.Object);
         }
 
         [Test]
