@@ -1,6 +1,7 @@
 ﻿using ComposeManager.Services;
 using JobModels;
 using Microsoft.AspNetCore.Mvc;
+using RandomNameGeneratorLibrary;
 using System;
 using System.Threading.Tasks;
 
@@ -25,7 +26,9 @@ namespace ComposeManager.Controllers
         [HttpPost("/start")]
         public async Task<ActionResult<string>> StartJob([FromBody]JobDescription jobDescription)
         {
-            string project = Guid.NewGuid().ToString("N");
+            //string project = Guid.NewGuid().ToString("N");
+            var personGenerator = new PersonNameGenerator();
+            string project = $"{personGenerator.GenerateRandomFirstName()}_{personGenerator.GenerateRandomLastName()}";
 
             await _jobRunner.RunJob(jobDescription, $"{project}");
 

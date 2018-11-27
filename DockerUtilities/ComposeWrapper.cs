@@ -91,7 +91,8 @@ namespace DockerUtilities
             }
             catch (ExitCodeValidationException ve)
             {
-                _logger.LogError("Compose Error: {0}", ve.ExecutionResult.StandardError);
+                _logger.LogError("Compose Error exit code {0}: {1}", ve.ExecutionResult.ExitCode, ve.ExecutionResult.StandardError);
+                _logger.LogError("Standard Output: {1}", ve.ExecutionResult.StandardOutput);
             }
 
             _logger.LogDebug("'docker-compose up' completed with output: {0}", result.StandardOutput);

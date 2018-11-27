@@ -37,7 +37,7 @@ namespace ComposeManager
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://*:5008/") //https://josephwoodward.co.uk/2017/02/many-different-ways-specifying-host-port-asp-net-core
+                .UseUrls("http://*:5009/") //https://josephwoodward.co.uk/2017/02/many-different-ways-specifying-host-port-asp-net-core
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     // Configure the app here.
