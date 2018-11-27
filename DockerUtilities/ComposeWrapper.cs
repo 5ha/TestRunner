@@ -1,6 +1,8 @@
 ﻿using CliWrap;
+using CliWrap.Exceptions;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -13,7 +15,7 @@ namespace DockerUtilities
         Task RunCompose(string projectName, string basePath, TimeSpan maxExecutionTime, string yaml);
     }
 
-    public class ComposeWrapper : IComposeWrapper
+    public class ComposeWrapper : IComposeWrapper, IDisposable
     {
         private string _projectName;
         private string _executionPath;
@@ -58,21 +60,40 @@ namespace DockerUtilities
 
                  await new Cli(DOCKER_COMPOSE)
                         .SetWorkingDirectory(_executionPath)
-                        .SetArguments($@"up")
+                        .SetArguments($@"up --force-recreate")
                         .EnableStandardErrorValidation(false)
                         .EnableExitCodeValidation()
                         .SetStandardOutputCallback(appendLine)
                         .SetStandardErrorCallback(appendLine)
+                        //.SetStandardOutputEncoding(Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage))
+                        .SetStandardOutputEncoding(Encoding.GetEncoding(437))
                         .ExecuteAsync();
 
                  return s.ToString();
                  
-             });
+             }, _cancellationTokenSource.Token);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             composeResult.ContinueWith((task, log) => {
-                (log as ILogger<ComposeWrapper>)?.LogDebug("'docker-compose up' completed with output: {0}", task.Result);
-            }, _logger).ConfigureAwait(false);
+                ILogger<ComposeWrapper> logger = log as ILogger<ComposeWrapper>;
+                try
+                {
+                    logger.LogDebug("'docker-compose up' completed with output: {0}", task.Result);
+                }
+                catch (AggregateException e)
+                {
+                    foreach (var inner in task.Exception.Flatten().InnerExceptions)
+                    {
+                        if (inner is ExitCodeValidationException ve)
+                        {
+                            logger.LogError("Compose Error: {0}", ve.ExecutionResult.StandardError);
+                        } else
+                        {
+                            logger.LogError("Compose Error: {0}", e.Message);
+                        }
+                    }
+                }
+            }, _logger, _cancellationTokenSource.Token).ConfigureAwait(false);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
 
@@ -196,5 +217,45 @@ namespace DockerUtilities
                 return Path.Combine(_executionPath, "docker-compose.yml");
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if(_cancellationTokenSource != null)
+                    {
+                        _cancellationTokenSource.Cancel();
+                        _cancellationTokenSource.Dispose();
+                        _cancellationTokenSource = null;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ComposeWrapper() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }
