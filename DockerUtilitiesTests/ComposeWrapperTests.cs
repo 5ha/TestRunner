@@ -1,5 +1,7 @@
 ﻿using CliWrap.Exceptions;
 using DockerUtilities;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
@@ -10,11 +12,13 @@ namespace DockerUtilitiesTests
     public class ComposeWrapperTests
     {
         ComposeWrapper _sut;
+        Mock<ILogger<ComposeWrapper>> _logger;
 
         [SetUp]
         public void SetUp()
         {
-            _sut = new ComposeWrapper("unittest", @"C:\Users\shawn\test", TimeSpan.FromMinutes(10));
+            _logger = new Mock<ILogger<ComposeWrapper>>();
+            _sut = new ComposeWrapper(_logger.Object);
         }
 
         [Test]
@@ -44,7 +48,7 @@ services:
 ";
             try
             {
-                await _sut.RunCompose(yaml);
+                await _sut.RunCompose("unittest", @"C:\Users\shawn\test", TimeSpan.FromMinutes(10), yaml);
             } catch(ExitCodeValidationException e)
             {
                 Console.WriteLine("=================== STANDARD OUTPUT ======================");

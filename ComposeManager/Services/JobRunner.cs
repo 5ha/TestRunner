@@ -1,6 +1,7 @@
 ﻿using ComposeManager.Config;
 using DockerUtilities;
 using JobModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -10,25 +11,29 @@ namespace ComposeManager.Services
 {
     public interface IJobRunner
     {
-        Task RunJob(JobDescription jobDescription, string instanceName);
+        void RunJob(JobDescription jobDescription, string instanceName);
     }
     public class JobRunner : IJobRunner
     {
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly ILogger<JobRunner> _logger;
+        private readonly IComposeWrapper _composeWrapper;
 
-        public JobRunner(IOptions<AppSettings> appSettings)
+        public JobRunner(IOptions<AppSettings> appSettings, ILogger<JobRunner> logger, IComposeWrapper composeWrapper)
         {
             _appSettings = appSettings;
+            _logger = logger;
+            _composeWrapper = composeWrapper;
         }
 
-        public async Task RunJob(JobDescription jobDescription, string instanceName)
+        public void RunJob(JobDescription jobDescription, string instanceName)
         {
-            ComposeWrapper compose = new ComposeWrapper(instanceName, _appSettings.Value.YamlBasePath,
-                                            TimeSpan.FromMinutes(_appSettings.Value.MaxComposeExecutionTimeInMinutes));
+            _logger.LogInformation("Running job {0}", jobDescription.Build);
 
             string enhancedYaml = EnhanceYaml(jobDescription, instanceName);
 
-            await compose.RunCompose(enhancedYaml);
+            _composeWrapper.RunCompose(instanceName, _appSettings.Value.YamlBasePath,
+                                            TimeSpan.FromMinutes(_appSettings.Value.MaxComposeExecutionTimeInMinutes), enhancedYaml).ConfigureAwait(false);
         }
 
         private string EnhanceYaml(JobDescription jobDescription, string instanceName)

@@ -1,5 +1,6 @@
 ﻿using ComposeManager.Config;
 using ComposeManager.Services;
+using DockerUtilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,7 @@ namespace ComposeManager
             services.Configure<QueueSettings>(Configuration.GetSection("QueueSettings"));
 
             services.AddTransient<IJobRunner, JobRunner>();
-            services.AddTransient<IJobRunnerService, JobRunnerService>();
+            services.AddTransient<IComposeWrapper, ComposeWrapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

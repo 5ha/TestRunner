@@ -1,16 +1,17 @@
 ﻿using ComposeManager.Services;
 using JobModels;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace ComposeManager.Controllers
 {
     public class ManagerController : ControllerBase
     {
-        private readonly IJobRunnerService _jobRunnerService;
+        private readonly IJobRunner _jobRunner;
 
-        public ManagerController(IJobRunnerService jobRunnerService)
+        public ManagerController(IJobRunner jobRunner)
         {
-            _jobRunnerService = jobRunnerService;
+            _jobRunner = jobRunner;
         }
 
         [HttpGet("/health")]
@@ -24,7 +25,10 @@ namespace ComposeManager.Controllers
         [HttpPost("/start")]
         public ActionResult<string> StartJob([FromBody]JobDescription jobDescription)
         {
-            _jobRunnerService.RunJob(jobDescription);
+            string project = Guid.NewGuid().ToString("N");
+
+            _jobRunner.RunJob(jobDescription, $"{project}");
+
             return $"STARTED: {jobDescription.Build}";
         }
     }
