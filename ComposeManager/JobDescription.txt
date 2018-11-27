@@ -1,0 +1,13 @@
+﻿{
+"Build":"151",
+"Image":"shawnseabrook/build:151",
+"Command":"RunTests.exe",
+"EnvironmentVariables":{
+"TESTER_SERVER":"wolverine.rmq.cloudamqp.com",
+"TESTER_VHOST":"ukmprevw",
+"TESTER_USERNAME":"ukmprevw",
+"TESTER_PASSWORD":"x0RnAwiYT54UrCjwmq7ZApU24Aoo6cPp",
+"TESTER_REQUEST_QUEUE":"151_request",
+"TESTER_RESPONSE_QUEUE":"151_response"},
+"Yaml":"version: \"3\"\nservices:\n  tester:\n    image: shawnseabrook/build:151\n    depends_on: [\"server\"]\n    command: [\"RunTests.exe\"]\n  server:\n    image: selenium/standalone-chrome\n\n"
+}
