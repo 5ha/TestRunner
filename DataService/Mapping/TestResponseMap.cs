@@ -10,10 +10,9 @@ namespace DataService.Mapping
         {
             builder.ToTable("TestResponse");
 
-            builder.HasKey(c => c.TestResponseId);
+            builder.HasKey(c => c.TestRequestId);
 
-            builder.Property(c => c.TestResponseId).HasColumnName("TestResponseId").UseSqlServerIdentityColumn();
-            builder.Property(c => c.JobId).HasColumnName("JobId").HasColumnType("int").IsRequired();
+            builder.Property(c => c.TestRequestId).HasColumnName("TestRequestId").ValueGeneratedNever();
             builder.Property(c => c.DateCreated).HasColumnName("DateCreated").HasColumnType("datetime2").IsRequired();
         }
     }

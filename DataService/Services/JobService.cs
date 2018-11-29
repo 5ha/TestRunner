@@ -31,7 +31,8 @@ namespace DataService.Services
             Job job = new Job
             {
                 DateCreated = DateTime.UtcNow,
-                Description = description
+                Description = description,
+                TestRequests = new List<TestRequest>()
             };
 
             foreach (string test in tests)
@@ -40,6 +41,8 @@ namespace DataService.Services
                 {
                     TestName = test
                 };
+
+                job.TestRequests.Add(request);
             }
 
             _context.Jobs.Add(job);

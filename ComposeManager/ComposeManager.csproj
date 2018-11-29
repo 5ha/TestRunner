@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonModels\CommonModels.csproj" />
     <ProjectReference Include="..\DockerUtilities\DockerUtilities.csproj" />
     <ProjectReference Include="..\JobModels\JobModels.csproj" />
   </ItemGroup>

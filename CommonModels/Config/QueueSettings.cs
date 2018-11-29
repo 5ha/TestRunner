@@ -1,4 +1,4 @@
-﻿namespace ComposeManager.Config
+﻿namespace CommonModels.Config
 {
     public class QueueSettings
     {

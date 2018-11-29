@@ -1,4 +1,5 @@
-﻿using ComposeManager.Config;
+﻿using CommonModels.Config;
+using ComposeManager.Config;
 using ComposeManager.Services;
 using DockerUtilities;
 using Microsoft.AspNetCore.Builder;
@@ -24,6 +25,8 @@ namespace ComposeManager
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.UseQueueConfig(Configuration);
 
             services.Configure<AppSettings>(Configuration);
             services.Configure<QueueSettings>(Configuration.GetSection("QueueSettings"));

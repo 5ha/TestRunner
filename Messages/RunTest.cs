@@ -6,7 +6,7 @@ namespace Messages
 {
     public class RunTest
     {
-        public string Build { get; set; }
+        public int TestRequestId { get; set; }
         public string FullName { get; set; }
     }
 }

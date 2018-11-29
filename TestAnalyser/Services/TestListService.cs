@@ -41,7 +41,6 @@ namespace TestAnalyser.Services
                 {
                     RunTest item = new RunTest
                     {
-                        Build = build,
                         FullName = testName.Trim()
                     };
 

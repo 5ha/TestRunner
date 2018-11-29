@@ -64,15 +64,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUtilities", "DockerUt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockerUtilitiesTests", "DockerUtilitiesTests\DockerUtilitiesTests.csproj", "{2F67D06D-D6D0-4156-8685-418DC7206E63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAnalyser", "TestAnalyser\TestAnalyser.csproj", "{C6DC35FC-482C-428C-96C5-1EC269B5BBB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAnalyser", "TestAnalyser\TestAnalyser.csproj", "{C6DC35FC-482C-428C-96C5-1EC269B5BBB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messages", "Messages\Messages.csproj", "{94CAA336-1C64-4C34-AD53-9C952CE689CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messages", "Messages\Messages.csproj", "{94CAA336-1C64-4C34-AD53-9C952CE689CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueService", "QueueService\QueueService.csproj", "{BC78F03C-384C-41CC-BD5A-15D9E3156704}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueueService", "QueueService\QueueService.csproj", "{BC78F03C-384C-41CC-BD5A-15D9E3156704}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestOrchestrator", "TestOrchestrator\TestOrchestrator.csproj", "{12AB7F98-87D4-4E05-860A-8307883233B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestOrchestrator", "TestOrchestrator\TestOrchestrator.csproj", "{12AB7F98-87D4-4E05-860A-8307883233B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataService", "DataService\DataService.csproj", "{73BE2D6B-2E39-4014-A129-2221BA5848D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "DataService\DataService.csproj", "{73BE2D6B-2E39-4014-A129-2221BA5848D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonModels", "CommonModels\CommonModels.csproj", "{4F8698C2-B27D-4408-B210-18F32AF2263D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -456,6 +458,18 @@ Global
 		{73BE2D6B-2E39-4014-A129-2221BA5848D1}.Release|x64.Build.0 = Release|Any CPU
 		{73BE2D6B-2E39-4014-A129-2221BA5848D1}.Release|x86.ActiveCfg = Release|Any CPU
 		{73BE2D6B-2E39-4014-A129-2221BA5848D1}.Release|x86.Build.0 = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|x64.Build.0 = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Debug|x86.Build.0 = Debug|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|x64.ActiveCfg = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|x64.Build.0 = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|x86.ActiveCfg = Release|Any CPU
+		{4F8698C2-B27D-4408-B210-18F32AF2263D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
