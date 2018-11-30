@@ -69,7 +69,7 @@ namespace TestRunner
                     var testResult = responseNode.Attributes["result"].Value;
                     Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
 
-                    sender.Send(new TestResult { Build = m.Build, FullName = m.FullName, Result = responseXML });
+                    sender.Send(new TestResult { TestRequestId = m.TestRequestId, Build = m.Build, FullName = m.FullName, Result = responseXML });
                 } catch(Exception e)
                 {
                     sender.Send(new StatusMessage { Application = "TestRunner", Process = instanceName,  Error = e.Message });

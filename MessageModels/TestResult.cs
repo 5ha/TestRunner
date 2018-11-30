@@ -6,6 +6,7 @@ namespace MessageModels
 {
     public class TestResult
     {
+        public int TestRequestId { get; set; }
         public string Build { get; set; }
         public string FullName { get; set; }
         public bool Passed { get; set; }
