@@ -2,10 +2,12 @@
 using DataService.Services;
 using JobModels;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TestOrchestrator.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TestOrchestrator.Services
 {
@@ -16,50 +18,50 @@ namespace TestOrchestrator.Services
 
     public class ComposerService : IComposerService
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly IOptions<ComposerSettings> _composerSettings;
         private readonly IOptions<QueueSettings> _queueSettings;
-        private readonly IJobService _jobService;
 
-        public ComposerService(IOptions<ComposerSettings> composerSettings, IOptions<QueueSettings> queueSettings, IJobService jobService)
+        public ComposerService(IServiceProvider serviceProvider, IOptions<ComposerSettings> composerSettings, 
+            IOptions<QueueSettings> queueSettings)
         {
+            _serviceProvider = serviceProvider;
             _composerSettings = composerSettings;
             _queueSettings = queueSettings;
-            _jobService = jobService;
         }
 
-        public async Task RunCompose(StartJobRequest request, int jobId)
+        public Task RunCompose(StartJobRequest request, int jobId)
         {
             JobDescription jobDescription = CreateJobDescription(request, jobId);
 
-            //return Task.Run(() => {
-
-            List<Task<HttpResponseMessage>> calls = new List<Task<HttpResponseMessage>>();
-
-            foreach (Endpoint endpoint in _composerSettings.Value.Endpoints)
+            return Task.Run(() =>
             {
-                await CallEndpoint(endpoint, jobDescription);
-                //calls.Add(CallEndpoint(endpoint, jobDescription));
-            }
+                using (IServiceScope scope = _serviceProvider.CreateScope())
+                {
+                    List<Task<HttpResponseMessage>> calls = new List<Task<HttpResponseMessage>>();
+                    foreach (Endpoint endpoint in _composerSettings.Value.Endpoints)
+                    {
+                        //await CallEndpoint(endpoint, jobDescription);
+                        calls.Add(CallEndpoint(endpoint, jobDescription));
 
-            //Task.WaitAll(calls.ToArray());
+                        Task.WaitAll(calls.ToArray());
 
-            // Set the entire job as completed
-            _jobService.MarkJobAsComplete(jobId);
+                        IJobService jobService = scope.ServiceProvider.GetService<IJobService>();
 
-            //});
-
-
+                        // Set the entire job as completed
+                        jobService.MarkJobAsComplete(jobId);
+                    }
+                }
+            });
         }
 
-        private async Task CallEndpoint(Endpoint endpoint, JobDescription jobDescription)
+        private Task<HttpResponseMessage> CallEndpoint(Endpoint endpoint, JobDescription jobDescription)
         {
             HttpResponseMessage res = null;
 
             HttpClient client = new HttpClient();
 
-            res = await client.PostAsJsonAsync(endpoint.Url, jobDescription);
-
-            //return Task.FromResult<HttpResponseMessage>(res);
+            return client.PostAsJsonAsync(endpoint.Url, jobDescription);
         }
 
         private JobDescription CreateJobDescription(StartJobRequest request, int jobId)

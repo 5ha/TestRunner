@@ -61,7 +61,7 @@ namespace TestOrchestrator.Controllers
             _queues.EnqueueTests(job);
 
             // Call the compose endpoints
-            await _composerService.RunCompose(request, job.JobId);
+            _composerService.RunCompose(request, job.JobId).ConfigureAwait(false);
 
             // Return the polling url
             return "Started";
