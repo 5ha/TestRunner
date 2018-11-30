@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TestOrchestrator.Services;
 
 namespace TestOrchestrator
 {
@@ -25,6 +26,8 @@ namespace TestOrchestrator
             services.UseQueueConfig(Configuration);
 
             services.AddDataService(Configuration.GetConnectionString("TestRunnerDatabase"));
+
+            services.AddHostedService<QueueSubscriberService>();
 
             services.SetupServices();
         }

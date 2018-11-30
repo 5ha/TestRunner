@@ -8,6 +8,7 @@ namespace DataService.Services
     public interface IJobService
     {
         Job CreateJob(string description, List<string> tests);
+        TestResponse CreateTestResponse(int testRequestId);
     }
 
     public class JobService : IJobService
@@ -49,6 +50,20 @@ namespace DataService.Services
             _context.SaveChanges();
 
             return job;
+        }
+
+        public TestResponse CreateTestResponse(int testRequestId)
+        {
+            TestResponse response = new TestResponse
+            {
+                TestRequestId = testRequestId,
+                DateCreated = DateTime.UtcNow
+            };
+
+            _context.TestResponses.Add(response);
+            _context.SaveChanges();
+
+            return response;
         }
     }
 }
