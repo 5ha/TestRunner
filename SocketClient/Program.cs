@@ -124,7 +124,11 @@ namespace SocketClient
             SocketClientHandler.OutputMessage("Exiting");
         }
 
-
+        /**
+         * ARTIFACTS
+         * ##teamcity[publishArtifacts '<path>']
+         * https://confluence.jetbrains.com/display/TCD18/Build+Script+Interaction+with+TeamCity
+         * */
 
         /**
          * echo ##teamcity[message text='compiler output']
