@@ -61,7 +61,9 @@ namespace TestOrchestrator.Controllers
             _queues.EnqueueTests(job);
 
             // Call the compose endpoints
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _composerService.RunCompose(request, job.JobId).ConfigureAwait(false);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             // Return the polling url
             return "Started";

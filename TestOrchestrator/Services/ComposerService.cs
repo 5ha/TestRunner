@@ -41,8 +41,10 @@ namespace TestOrchestrator.Services
                     List<Task<HttpResponseMessage>> calls = new List<Task<HttpResponseMessage>>();
                     foreach (Endpoint endpoint in _composerSettings.Value.Endpoints)
                     {
-                        //await CallEndpoint(endpoint, jobDescription);
-                        calls.Add(CallEndpoint(endpoint, jobDescription));
+                        for (int i = 0; i < endpoint.Concurrency; i++)
+                        {
+                            calls.Add(CallEndpoint(endpoint, jobDescription));
+                        }
 
                         Task.WaitAll(calls.ToArray());
 
