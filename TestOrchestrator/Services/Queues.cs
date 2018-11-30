@@ -9,6 +9,7 @@ namespace TestOrchestrator.Services
     public interface IQueues
     {
         void EnqueueTests(Job job);
+        void DeleteQueue(int jobId);
     }
 
     public class Queues : IQueues
@@ -34,6 +35,20 @@ namespace TestOrchestrator.Services
                 {
                     EnqueueTest(sender, request);
                 }
+            }
+        }
+
+        public void DeleteQueue(int jobId)
+        {
+            string queueName = $"{jobId}";
+            IQueueBuilder queueBuilder = new RabbitBuilder();
+
+            using (ISender sender = queueBuilder
+                .ConfigureTransport(_settings.Value.Server, _settings.Value.Vhost, _settings.Value.Username, _settings.Value.Password)
+                .ISendTo(queueName)
+                .Build())
+            {
+                sender.DeleteQueue();
             }
         }
 

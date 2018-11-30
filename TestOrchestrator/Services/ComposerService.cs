@@ -52,6 +52,10 @@ namespace TestOrchestrator.Services
 
                         // Set the entire job as completed
                         jobService.MarkJobAsComplete(jobId);
+
+                        IQueues queues = scope.ServiceProvider.GetService<IQueues>();
+
+                        queues.DeleteQueue(jobId);
                     }
                 }
             });

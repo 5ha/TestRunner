@@ -41,7 +41,7 @@ namespace TestOrchestrator.Controllers
         }
 
         [HttpPost("/createjob")]
-        public async Task<string> InitiateJob([FromBody]StartJobRequest request)
+        public ActionResult<string> InitiateJob([FromBody]StartJobRequest request)
         {
             if(request == null)
             {
