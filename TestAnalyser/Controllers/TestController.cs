@@ -20,9 +20,9 @@ namespace TestAnalyser.Controllers
         }
 
         [HttpPost("/listtests")]
-        public async Task<ActionResult<List<RunTest>>> ListTests([FromBody]JobDescription jobDescription)
+        public async Task<ActionResult<List<TestInfo>>> ListTests([FromBody]TestRequestDescription request)
         {
-            return await _testListService.ListTests(jobDescription.Build, jobDescription.Image, jobDescription.Command);
+            return await _testListService.ListTests(request.TestRunImage, request.TestRunCommand);
         }
     }
 }

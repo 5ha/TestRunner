@@ -1,0 +1,2 @@
+C:\Users\shawn\source\repos\TestNUnitRunner\ComposeManager\bin\Debug\netcoreapp2.1\win7-x64\ComposeManager.exe --console
+& C:\Users\shawn\source\repos\TestNUnitRunner\TestAnalyser\bin\Debug\netcoreapp2.1\win7-x64\TestAnalyser.exe --console

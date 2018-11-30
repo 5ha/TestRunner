@@ -3,6 +3,7 @@ using DataService.Services;
 using Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QueueService.Builders;
 using QueueService.Interfaces;
@@ -16,19 +17,23 @@ namespace TestOrchestrator.Services
     {
         private readonly IOptions<QueueSettings> _settings;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
         private IReceiver _receiver;
 
-        public QueueSubscriberService(IOptions<QueueSettings> settings, IServiceProvider serviceProvider)
+        public static readonly string RESPONSE_QUEUE_NAME = "TestResults";
+
+        public QueueSubscriberService(IOptions<QueueSettings> settings, IServiceProvider serviceProvider, ILogger<QueueSubscriberService> logger)
         {
             _settings = settings;
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             IQueueBuilder queueBuilder = new RabbitBuilder();
             _receiver = queueBuilder.ConfigureTransport(_settings.Value.Server, _settings.Value.Vhost, _settings.Value.Username, _settings.Value.Password)
-                .IReceiveFrom("Results")
+                .IReceiveFrom(RESPONSE_QUEUE_NAME)
                 .IReceiveForever()
                 .Build();
 
@@ -46,7 +51,15 @@ namespace TestOrchestrator.Services
                     scope.ServiceProvider
                         .GetRequiredService<IJobService>();
 
-                jobService.CreateTestResponse(testResult.TestRequestId);
+                try
+                {
+                    jobService.CreateTestResponse(testResult.TestRequestId);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error saving test response with TestRequestId {0}", testResult.TestRequestId);
+                }
+                
             }
         }
 

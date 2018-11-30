@@ -28,7 +28,7 @@ namespace ComposeManager.Services
 
         public Task RunJob(JobDescription jobDescription, string instanceName)
         {
-            _logger.LogInformation("Running job {0}", jobDescription.Build);
+            _logger.LogInformation("Running job {0}", "jobDescription.Build");
 
             string enhancedYaml = EnhanceYaml(jobDescription, instanceName);
 
@@ -38,7 +38,7 @@ namespace ComposeManager.Services
 
         private string EnhanceYaml(JobDescription jobDescription, string instanceName)
         {
-            ComposeFileParser parser = new ComposeFileParser(jobDescription.Yaml);
+            ComposeFileParser parser = new ComposeFileParser(jobDescription.StartJobRequest.Yaml);
 
             if (jobDescription.EnvironmentVariables == null)
                 jobDescription.EnvironmentVariables = new Dictionary<string, string>();

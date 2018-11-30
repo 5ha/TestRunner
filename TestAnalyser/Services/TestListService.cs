@@ -1,4 +1,5 @@
 ﻿using DockerUtilities;
+using JobModels;
 using Messages;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ namespace TestAnalyser.Services
 {
     public interface ITestListService
     {
-        Task<List<RunTest>> ListTests(string build, string image, string command);
+        Task<List<TestInfo>> ListTests(string image, string command);
     }
 
     public class TestListService : ITestListService
@@ -22,7 +23,7 @@ namespace TestAnalyser.Services
             _dockerWrapper = dockerWrapper;
         }
 
-        public async Task<List<RunTest>> ListTests(string build, string image, string command)
+        public async Task<List<TestInfo>> ListTests(string image, string command)
         {
             Dictionary<string, string> environmentVariable = new Dictionary<string, string>
                     {
@@ -31,7 +32,7 @@ namespace TestAnalyser.Services
 
             string testOutput = await _dockerWrapper.Run(image, environmentVariables: environmentVariable, command: command);
 
-            List<RunTest> tests = new List<RunTest>();
+            List<TestInfo> tests = new List<TestInfo>();
 
             string[] testNames = testOutput.Split('\n');
 
@@ -39,7 +40,7 @@ namespace TestAnalyser.Services
             {
                 if (!string.IsNullOrEmpty(testName))
                 {
-                    RunTest item = new RunTest
+                    TestInfo item = new TestInfo
                     {
                         FullName = testName.Trim()
                     };

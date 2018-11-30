@@ -8,6 +8,8 @@ namespace TestOrchestrator
         public static void SetupServices(this IServiceCollection self)
         {
             self.AddTransient<IQueues, Queues>();
+            self.AddTransient<ITestListService, TestListService>();
+            self.AddTransient<IComposerService, ComposerService>();
         }
     }
 }

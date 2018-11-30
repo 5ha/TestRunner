@@ -74,7 +74,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestOrchestrator", "TestOrc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "DataService\DataService.csproj", "{73BE2D6B-2E39-4014-A129-2221BA5848D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonModels", "CommonModels\CommonModels.csproj", "{4F8698C2-B27D-4408-B210-18F32AF2263D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonModels", "CommonModels\CommonModels.csproj", "{4F8698C2-B27D-4408-B210-18F32AF2263D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BatFiles", "BatFiles", "{1415F839-561F-4C71-B868-3FB7E403A6BE}"
+	ProjectSection(SolutionItems) = preProject
+		Up.bat = Up.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

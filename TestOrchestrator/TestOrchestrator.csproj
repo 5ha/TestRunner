@@ -12,11 +12,13 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommonModels\CommonModels.csproj" />
     <ProjectReference Include="..\DataService\DataService.csproj" />
+    <ProjectReference Include="..\JobModels\JobModels.csproj" />
     <ProjectReference Include="..\Messages\Messages.csproj" />
     <ProjectReference Include="..\QueueService\QueueService.csproj" />
   </ItemGroup>

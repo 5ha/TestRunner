@@ -1,14 +1,17 @@
 ﻿using DataService.Entities;
+using JobModels;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DataService.Services
 {
     public interface IJobService
     {
-        Job CreateJob(string description, List<string> tests);
+        Job CreateJob(string description, List<TestInfo> tests);
         TestResponse CreateTestResponse(int testRequestId);
+        void MarkJobAsComplete(int jobId);
     }
 
     public class JobService : IJobService
@@ -22,7 +25,7 @@ namespace DataService.Services
             _context = context;
         }
 
-        public Job CreateJob(string description, List<string> tests)
+        public Job CreateJob(string description, List<TestInfo> tests)
         {
             if (string.IsNullOrEmpty(description))
             {
@@ -36,11 +39,11 @@ namespace DataService.Services
                 TestRequests = new List<TestRequest>()
             };
 
-            foreach (string test in tests)
+            foreach (TestInfo test in tests)
             {
                 TestRequest request = new TestRequest
                 {
-                    TestName = test
+                    TestName = test.FullName
                 };
 
                 job.TestRequests.Add(request);
@@ -64,6 +67,17 @@ namespace DataService.Services
             _context.SaveChanges();
 
             return response;
+        }
+
+        public void MarkJobAsComplete(int jobId)
+        {
+            Job job = _context.Jobs.SingleOrDefault(x => x.JobId == jobId && x.DateCompleted == null);
+
+            if (job != null)
+            {
+                job.DateCompleted = DateTime.UtcNow;
+                _context.SaveChanges();
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TestOrchestrator.Models;
 using TestOrchestrator.Services;
 
 namespace TestOrchestrator
@@ -24,6 +25,10 @@ namespace TestOrchestrator
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.UseQueueConfig(Configuration);
+
+            services.Configure<TestAnalyserSettings>(Configuration.GetSection("TestAnalyserSettings"));
+
+            services.Configure<ComposerSettings>(Configuration.GetSection("ComposerSettings"));
 
             services.AddDataService(Configuration.GetConnectionString("TestRunnerDatabase"));
 

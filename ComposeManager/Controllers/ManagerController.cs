@@ -32,7 +32,7 @@ namespace ComposeManager.Controllers
 
             await _jobRunner.RunJob(jobDescription, $"{project}");
 
-            return $"STARTED: {jobDescription.Build}";
+            return $"STARTED: jobDescription.Build";
         }
     }
 }
