@@ -12,6 +12,7 @@ namespace DataService.Services
         Job CreateJob(string description, List<TestInfo> tests);
         TestResponse CreateTestResponse(int testRequestId);
         void MarkJobAsComplete(int jobId);
+        JobResult GetResults(int jobId, int lastTestRequestId);
     }
 
     public class JobService : IJobService
@@ -78,6 +79,27 @@ namespace DataService.Services
                 job.DateCompleted = DateTime.UtcNow;
                 _context.SaveChanges();
             }
+        }
+
+        public JobResult GetResults(int jobId, int lastTestRequestId)
+        {
+            JobResult result = new JobResult();
+
+            Job job = _context.Jobs.Single(x => x.JobId == jobId);
+
+            result.IsComplete = job.DateCompleted != null;
+
+            result.JobTestResults =
+                (from r in _context.TestResponses
+                 where r.TestRequest.JobId == jobId
+                 && r.TestRequestId > lastTestRequestId
+                 select new JobTestResult
+                 {
+                     TestRequestId = r.TestRequestId
+                     //FullName = r.
+                 }).ToList();
+
+            return result;
         }
     }
 }

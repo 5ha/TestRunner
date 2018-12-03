@@ -63,8 +63,6 @@ namespace TestOrchestrator.Services
 
         private Task<HttpResponseMessage> CallEndpoint(Endpoint endpoint, JobDescription jobDescription)
         {
-            HttpResponseMessage res = null;
-
             HttpClient client = new HttpClient();
 
             return client.PostAsJsonAsync(endpoint.Url, jobDescription);

@@ -14,6 +14,8 @@ namespace DataService.Mapping
 
             builder.Property(c => c.TestRequestId).HasColumnName("TestRequestId").ValueGeneratedNever();
             builder.Property(c => c.DateCreated).HasColumnName("DateCreated").HasColumnType("datetime2").IsRequired();
+
+            builder.HasOne(c => c.TestRequest).WithOne(t => t.TestResponse);
         }
     }
 }

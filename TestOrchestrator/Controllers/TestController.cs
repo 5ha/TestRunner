@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TestOrchestrator.Models;
 using TestOrchestrator.Services;
+using System.Linq;
 
 namespace TestOrchestrator.Controllers
 {
@@ -66,17 +67,26 @@ namespace TestOrchestrator.Controllers
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             // Return the polling url
-            return "Started";
+            return PollUrl(job.JobId, 0);
         }
 
-        //[HttpPost("/createjob")]
-        //public ActionResult<int> CreateJob([FromBody]CreateJobRequest request)
-        //{
-        //    Job job = _jobService.CreateJob(request.Description, request.Tests);
+        [HttpGet("/poll/{jobId}/{lastTestRequestId}")]
+        public ActionResult<JobResult> GetResults(int jobId, int lastTestRequestId = 0)
+        {
+            JobResult result = _jobService.GetResults(jobId, lastTestRequestId);
 
-        //    _queues.EnqueueTests(job);
+            if (!result.IsComplete)
+            {
+                int lastId = result.JobTestResults.OrderByDescending(x => x.TestRequestId).FirstOrDefault()?.TestRequestId ?? 0;
+                result.NextResult = PollUrl(jobId, lastId);
+            }
 
-        //    return job.JobId;
-        //}
+            return result;
+        }
+
+        private string PollUrl(int jobId, int testRequestId)
+        {
+            return Url.Action("GetResults", "Test", new { jobId = jobId, lastTestRequestId = testRequestId },"http");
+        }
     }
 }

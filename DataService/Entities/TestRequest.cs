@@ -2,7 +2,7 @@
 
 namespace DataService.Entities
 {
-    public class TestRequest 
+    public class TestRequest
     {
         public int TestRequestId { get; set; }
 
@@ -11,5 +11,7 @@ namespace DataService.Entities
         public string TestName { get; set; }
 
         public virtual Job Job { get; set; }
+
+        public virtual TestResponse TestResponse { get; set; }
     }
 }
