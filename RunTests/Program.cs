@@ -19,22 +19,50 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
+            Console.WriteLine("Running tester in container");
 
             string requestQueueName = System.Environment.GetEnvironmentVariable("TESTER_REQUEST_QUEUE");
+
+            Console.WriteLine($"requestQueueName: {requestQueueName}");
+
+
             string responseQueueName = System.Environment.GetEnvironmentVariable("TESTER_RESPONSE_QUEUE");
+
+            Console.WriteLine($"responseQueueName: {responseQueueName}");
+
             string instanceName = System.Environment.GetEnvironmentVariable("TESTER_INSTANCE");
+
+            Console.WriteLine($"instanceName: {instanceName}");
+
             string queueServer = System.Environment.GetEnvironmentVariable("TESTER_SERVER");
+
+            Console.WriteLine($"queueServer: {queueServer}");
+
             string queueVhost = System.Environment.GetEnvironmentVariable("TESTER_VHOST");
+
+            Console.WriteLine($"queueVhost: {queueVhost}");
+
             string queueUsername = System.Environment.GetEnvironmentVariable("TESTER_USERNAME");
+
+            Console.WriteLine($"queueUsername: {queueUsername}");
+
             string queuePassword = System.Environment.GetEnvironmentVariable("TESTER_PASSWORD");
+
+            Console.WriteLine($"queuePassword: {queuePassword}");
+
 
             string directoryToSearch = ConfigurationManager.AppSettings["directoryToSearch"];
 
+            Console.WriteLine($"directoryToSearch: {directoryToSearch}");
+
             string listTests = System.Environment.GetEnvironmentVariable("TESTER_LISTTESTS");
+
+            Console.WriteLine($"listTests: {listTests}");
 
             if (!string.IsNullOrEmpty(listTests))
             {
                 ListTests(directoryToSearch);
+
                 return;
             }
 
@@ -46,7 +74,7 @@ namespace TestRunner
             receiver =
                 queueBuilder.ConfigureTransport(queueServer, queueVhost, queueUsername, queuePassword)
                 .IReceiveFrom(requestQueueName)
-                .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(5), ShutDown)
+                .IReceiveUntilNoMoreMessages(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(20), ShutDown)
                 .Build();
 
             queueBuilder = new RabbitBuilder();
@@ -69,7 +97,7 @@ namespace TestRunner
                     var testResult = responseNode.Attributes["result"].Value;
                     Console.WriteLine($"{m.FullName} : {testResult.ToUpper()}");
 
-                    sender.Send(new TestResult { TestRequestId = m.TestRequestId, Build = m.Build, FullName = m.FullName, Result = responseXML });
+                    sender.Send(new TestResult { TestRequestId = m.TestRequestId, Build = m.Build, FullName = m.FullName });
                 } catch(Exception e)
                 {
                     sender.Send(new StatusMessage { Application = "TestRunner", Process = instanceName,  Error = e.Message });
@@ -83,12 +111,23 @@ namespace TestRunner
         {
             using (ITestEngine testEngine = TestEngineActivator.CreateInstance())
             {
+                Console.WriteLine("In test engine instance");
+
                 var files = Directory.GetFiles(directoryToSearch, "*.dll", SearchOption.AllDirectories);
+
+                Console.WriteLine($"Found {files.Count()} to search");
+
                 TestPackage package = new TestPackage(files);
+
+                Console.WriteLine("Test package created");
+
 
                 using (ITestRunner runner = testEngine.GetRunner(package))
                 {
+                    Console.WriteLine("In runner");
+
                     var testSuites = runner.Explore(TestFilter.Empty);
+
                     var testCases = testSuites.SelectNodes("//test-case");
 
                     foreach (XmlNode n in testCases)

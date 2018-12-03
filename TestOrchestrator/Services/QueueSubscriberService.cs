@@ -27,6 +27,8 @@ namespace TestOrchestrator.Services
             _settings = settings;
             _serviceProvider = serviceProvider;
             _logger = logger;
+
+            _logger.LogDebug("QueueSubscriberService instantiated");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -37,6 +39,8 @@ namespace TestOrchestrator.Services
                 .IReceiveForever()
                 .Build();
 
+            _logger.LogDebug("Received Created");
+
             _receiver.Receive<TestResult>(ReceiveMessage);
 
 
@@ -45,6 +49,8 @@ namespace TestOrchestrator.Services
 
         private void ReceiveMessage(TestResult testResult)
         {
+            _logger.LogDebug("Message Received");
+
             using (var scope = _serviceProvider.CreateScope())
             {
                 var jobService =
